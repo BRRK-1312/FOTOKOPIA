@@ -79,6 +79,15 @@
   .plate input[type=color]{width:40px;height:22px}
   .plate .pl{color:var(--dim);letter-spacing:1px;font-size:10px}
   .swatches.riso .sw{width:22px;height:22px}
+  .angles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .angles .a{display:flex;flex-direction:column;gap:3px}
+  .angles .a span{color:var(--dim);font-size:9px;letter-spacing:1px;text-align:center}
+  .angles .a input{width:100%}
+  .spotink{display:grid;grid-template-columns:30px 1fr 1fr 22px;gap:6px;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .spotink input[type=color]{height:24px;padding:1px}
+  .spotink .mini{display:flex;flex-direction:column}
+  .spotink .mini span{color:var(--dim);font-size:8px;letter-spacing:.5px}
+  .spotink .del{background:transparent;border:1px solid var(--line);color:var(--dim);cursor:pointer;height:24px}
   .footer{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
   .btn{width:100%;padding:11px;border:none;cursor:pointer;font-family:'Bebas Neue';font-size:17px;letter-spacing:3px;background:var(--vermillion);color:#fff;transition:.12s}
   .btn:hover{background:#ff5337}
@@ -156,9 +165,21 @@
     <div class="group" data-g>
       <h3 data-i18n="g_halftone">Semitono</h3>
       <div class="body">
-        <div class="ctrl"><label class="toggle" id="htToggle"><span class="box"></span> <span data-i18n="ht_on">Activar trama</span></label></div>
+        <div class="ctrl"><label data-i18n="screentype">Tipo de trama</label>
+          <div class="seg" id="screenType" style="grid-template-columns:repeat(4,1fr)">
+            <button data-s="cont" class="on" data-i18n="st_cont">Sólido</button><button data-s="am" data-i18n="st_am">Punto</button><button data-s="line" data-i18n="st_line">Línea</button><button data-s="cross" data-i18n="st_cross">Cruz</button>
+            <button data-s="fm" data-i18n="st_fm">FM</button><button data-s="bayer" data-i18n="st_bayer">Bayer</button><button data-s="stoch" data-i18n="st_stoch">Estoc.</button>
+          </div>
+        </div>
+        <div class="ctrl"><label data-i18n="dotshape">Forma de punto</label>
+          <div class="seg" id="dotShape" style="grid-template-columns:repeat(3,1fr)">
+            <button data-d="round" class="on" data-i18n="ds_round">Redondo</button><button data-d="ellipse" data-i18n="ds_ellipse">Elíptico</button><button data-d="square" data-i18n="ds_square">Cuadrado</button>
+          </div>
+        </div>
         <div class="ctrl"><label><span data-i18n="ht_freq">Frecuencia (px)</span><span class="val" id="vHtFreq">6</span></label><input type="range" id="htFreq" min="3" max="20" step="0.5" value="6" disabled></div>
         <div class="ctrl"><label><span data-i18n="dotgain">Ganancia de punto</span><span class="val" id="vDotgain">0.20</span></label><input type="range" id="dotgain" min="0" max="1.2" step="0.01" value="0.2"></div>
+        <div class="ctrl"><label><span data-i18n="trap">Trapping (choke/spread)</span><span class="val" id="vTrap">0</span></label><input type="range" id="trap" min="-3" max="3" step="1" value="0"></div>
+        <div class="ctrl"><label><span data-i18n="generations">Copia de copia</span><span class="val" id="vGenerations">1</span></label><input type="range" id="generations" min="1" max="6" step="1" value="1"></div>
       </div>
     </div>
 
@@ -194,13 +215,42 @@
           <div class="swatches riso" id="risoSw" style="margin-top:8px"></div>
         </div>
         <div id="cmykCol" class="hidden">
-          <div id="plates"></div>
+          <div class="ctrl"><label data-i18n="separation">Separación</label>
+            <div class="seg" id="separation" style="grid-template-columns:1fr 1fr">
+              <button data-s="cmyk" class="on">CMYK</button><button data-s="spot" data-i18n="sep_spot">Spot / Dúo</button>
+            </div>
+          </div>
+          <div id="cmykPlates">
+            <div id="plates"></div>
+            <div class="ctrl" style="margin-top:6px"><span class="cap" data-i18n="angles">ÁNGULOS DE TRAMA</span>
+              <div class="angles" id="angles"></div>
+            </div>
+          </div>
+          <div id="spotEditor" class="hidden">
+            <div id="spotInks"></div>
+            <button class="btn ghost sm" id="addSpot" data-i18n="addink" style="margin:4px 0 10px">+ TINTA</button>
+          </div>
           <div class="ctrl"><label><span data-i18n="mis">Misregistration</span><span class="val" id="vMis">5</span></label><input type="range" id="mis" min="0" max="24" step="1" value="5"></div>
           <div class="ctrl"><label><span data-i18n="misrot">Rotación plancha</span><span class="val" id="vMisRot">0.0</span></label><input type="range" id="misRot" min="0" max="3" step="0.1" value="0"></div>
           <div class="ctrl"><label><span data-i18n="rich">Riqueza CMY</span><span class="val" id="vRich">0.55</span></label><input type="range" id="rich" min="0" max="1" step="0.01" value="0.55"></div>
           <div class="ctrl"><span class="cap" data-i18n="c_paper">PAPEL</span><input type="color" id="paperColor2" value="#f2ead9"></div>
         </div>
         <div class="ctrl" style="margin-top:14px"><label class="toggle" id="invertToggle"><span class="box"></span> <span data-i18n="invert">Invertir</span></label></div>
+      </div>
+    </div>
+
+    <div class="group collapsed" data-g>
+      <h3 data-i18n="g_degrade">Degradación</h3>
+      <div class="body">
+        <div class="ctrl"><label><span data-i18n="deg_streak">Rayas de tambor</span><span class="val" id="vDegStreak">0</span></label><input type="range" id="degStreak" min="0" max="1" step="0.02" value="0"></div>
+        <div class="ctrl"><label><span data-i18n="deg_leak">Fuga de luz</span><span class="val" id="vDegLeak">0</span></label><input type="range" id="degLeak" min="0" max="1" step="0.02" value="0"></div>
+        <div class="ctrl"><label data-i18n="deg_corner">Esquina de fuga</label>
+          <div class="seg" id="degLeakCorner" style="grid-template-columns:repeat(4,1fr)">
+            <button data-k="0" class="on">↖</button><button data-k="1">↗</button><button data-k="2">↙</button><button data-k="3">↘</button>
+          </div>
+        </div>
+        <div class="ctrl"><label><span data-i18n="deg_rough">Borde roto</span><span class="val" id="vDegRough">0</span></label><input type="range" id="degRough" min="0" max="1" step="0.02" value="0"></div>
+        <div class="ctrl"><label><span data-i18n="deg_skew">Inclinación (skew)</span><span class="val" id="vSkew">0.0°</span></label><input type="range" id="skew" min="-5" max="5" step="0.2" value="0"></div>
       </div>
     </div>
 
@@ -233,6 +283,44 @@
       </div>
     </div>
 
+    <div class="group collapsed" data-g>
+      <h3 data-i18n="g_advanced">Avanzado</h3>
+      <div class="body">
+        <span class="cap" data-i18n="adv_vector">SALIDA VECTORIAL / PRINT</span>
+        <div class="row2"><button class="btn ghost sm" id="exportHpgl">HPGL</button><button class="btn ghost sm" id="exportDxf">DXF</button></div>
+        <button class="btn ghost sm" id="exportPdf" data-i18n="exp_pdf" style="margin-top:8px">PDF SEPARACIONES</button>
+
+        <span class="cap" data-i18n="adv_tile" style="margin-top:14px">TILING GRAN FORMATO</span>
+        <div class="colorrow">
+          <div><span class="cap" data-i18n="tile_cols">COLUMNAS</span><input type="number" id="tileCols" value="2" min="1" max="8" step="1"></div>
+          <div><span class="cap" data-i18n="tile_rows">FILAS</span><input type="number" id="tileRows" value="2" min="1" max="8" step="1"></div>
+        </div>
+        <button class="btn ghost sm" id="exportTiles" data-i18n="exp_tiles" style="margin-top:8px">EXPORTAR TILES</button>
+
+        <span class="cap" data-i18n="adv_text" style="margin-top:14px">TEXTO COMO IMAGEN</span>
+        <textarea id="textInput" rows="2" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);font-family:'JetBrains Mono';font-size:12px;padding:7px;resize:vertical">B_RR_K_</textarea>
+        <div class="ctrl" style="margin-top:8px"><label><span data-i18n="text_size">Tamaño</span><span class="val" id="vTextSize">220</span></label><input type="range" id="textSize" min="60" max="500" step="10" value="220"></div>
+        <div class="ctrl"><label data-i18n="text_font">Tipografía</label>
+          <div class="seg" id="textFont" style="grid-template-columns:1fr 1fr">
+            <button data-f="Bebas Neue" class="on">Bebas</button><button data-f="JetBrains Mono">Mono</button>
+          </div>
+        </div>
+        <button class="btn ghost sm" id="useText" data-i18n="text_use">USAR COMO IMAGEN</button>
+
+        <span class="cap" data-i18n="adv_video" style="margin-top:14px">VÍDEO WEBM</span>
+        <div class="ctrl"><label><span data-i18n="vid_frames">Fotogramas</span><span class="val" id="vVidFrames">36</span></label><input type="range" id="vidFrames" min="12" max="96" step="4" value="36"></div>
+        <div class="ctrl"><label data-i18n="vid_mode">Animar</label>
+          <div class="seg" id="vidMode" style="grid-template-columns:1fr 1fr">
+            <button data-v="seed" class="on" data-i18n="vid_seed">Semilla</button><button data-v="mis" data-i18n="vid_mis">Registro</button>
+          </div>
+        </div>
+        <button class="btn ghost sm" id="recordVid" data-i18n="vid_rec">GRABAR WEBM</button>
+
+        <span class="cap" data-i18n="adv_batch" style="margin-top:14px">PROCESO POR LOTES</span>
+        <button class="btn ghost sm" id="batchBtn" data-i18n="batch">PROCESAR VARIAS IMÁGENES</button>
+      </div>
+    </div>
+
     <div class="footer">
       <button class="btn" id="export" data-i18n="exp_png">EXPORTAR PNG</button>
       <div class="row2">
@@ -240,6 +328,19 @@
         <button class="btn ghost sm" id="exportAlpha" data-i18n="exp_alpha">PNG TINTA</button>
       </div>
       <button class="btn ghost sm" id="exportSep" data-i18n="exp_sep">SEPARACIONES C M Y K</button>
+      <button class="btn ghost sm" id="exportSvg" data-i18n="exp_svg">EXPORTAR SVG VECTORIAL</button>
+      <div class="row2">
+        <button class="btn ghost sm" id="undo" data-i18n="undo">↶ DESHACER</button>
+        <button class="btn ghost sm" id="redo" data-i18n="redo">REHACER ↷</button>
+      </div>
+      <div class="row2">
+        <button class="btn ghost sm" id="marksBtn" data-i18n="marks">MARCAS REG.</button>
+        <button class="btn ghost sm" id="shareBtn" data-i18n="share">COMPARTIR URL</button>
+      </div>
+      <div class="row2">
+        <button class="btn ghost sm" id="expJson" data-i18n="exp_json">JSON ↧</button>
+        <button class="btn ghost sm" id="impJson" data-i18n="imp_json">JSON ↥</button>
+      </div>
       <div class="row2">
         <button class="btn ghost sm" id="compareBtn" data-i18n="compare">COMPARAR</button>
         <button class="btn ghost sm" id="reset" data-i18n="changeimg">CAMBIAR IMG</button>
@@ -251,6 +352,8 @@
 
 <input type="file" id="file" accept="image/*" class="hidden">
 <input type="file" id="texFile" accept="image/*" class="hidden">
+<input type="file" id="jsonFile" accept="application/json,.json" class="hidden">
+<input type="file" id="batchFile" accept="image/*" multiple class="hidden">
 
 <!-- ===== pipeline (runs in a Web Worker; also eval'd on main as fallback) ===== -->
 <script id="core" type="text/js-worker">
@@ -330,6 +433,15 @@ function plateSoft(cov,bleed,blurR,dxN,dyN,streakLen,W,H){
   return s;
 }
 
+function maxFilter(buf,r,W,H){
+  if(r<=0)return buf;
+  const tmp=new Float32Array(buf.length),out=new Float32Array(buf.length);
+  for(let y=0;y<H;y++){const row=y*W;for(let x=0;x<W;x++){let m=0;const x0=Math.max(0,x-r),x1=Math.min(W-1,x+r);for(let xx=x0;xx<=x1;xx++){const v=buf[row+xx];if(v>m)m=v;}tmp[row+x]=m;}}
+  for(let x=0;x<W;x++){for(let y=0;y<H;y++){let m=0;const y0=Math.max(0,y-r),y1=Math.min(H-1,y+r);for(let yy=y0;yy<=y1;yy++){const v=tmp[yy*W+x];if(v>m)m=v;}out[y*W+x]=m;}}
+  return out;
+}
+const BAYER8=(function(){const m=[0,32,8,40,2,34,10,42,48,16,56,24,50,18,58,26,12,44,4,36,14,46,6,38,60,28,52,20,62,30,54,22,3,35,11,43,1,33,9,41,51,19,59,27,49,17,57,25,15,47,7,39,13,45,5,37,63,31,55,23,61,29,53,21];return m.map(v=>(v+0.5)/64);})();
+
 // ---- main entry: returns Uint8ClampedArray RGBA ----
 function renderCore(p, raw, W, H, tex){
   const n=W*H, out=new Uint8ClampedArray(n*4);
@@ -340,8 +452,20 @@ function renderCore(p, raw, W, H, tex){
   const blurR=Math.max(2,p.bleed+1);
   const cx=W/2,cy=H/2,maxR=Math.sqrt(cx*cx+cy*cy);
   const dirRad=p.dirA*Math.PI/180, ddx=Math.cos(dirRad), ddy=Math.sin(dirRad), streakLen=p.dirAmt;
-  const ht=p.halftone, htFreq=p.htFreq, dg=p.dotgain;
-  const mode=p.mode||'normal', sep=p.sep||null;
+  const dg=p.dotgain, htFreq=p.htFreq;
+  const screenType=p.screenType||(p.halftone?'am':'cont'), dotShape=p.dotShape||'round';
+  const gens=Math.max(1,p.generations||1), trap=p.trap||0;
+  const skewSlope=Math.tan((p.skew||0)*Math.PI/180);
+  const mode=p.mode||'normal', sep=p.sep!=null?p.sep:null;
+  const sepIdx=typeof sep==='number'?sep:({C:0,M:1,Y:2,K:3}[sep]||0);
+  // degradation precompute
+  const streakAmt=(p.degStreak||0), leakAmt=(p.degLeak||0), roughAmt=(p.degRough||0);
+  const streakRow=new Float32Array(H);
+  if(streakAmt>0){const sr=mulberry32(((p.seed>>>0)||1)+99);for(let y=0;y<H;y++){const b=0.5+0.5*Math.sin(y*0.08+sr()*6.28)+(sr()-0.5)*0.6;streakRow[y]=Math.max(0,b-0.6)*streakAmt;}}
+  const lkC=p.degLeakCorner||0, lkx=(lkC===1||lkC===3)?W:0, lky=(lkC>=2)?H:0;
+  // rough edge mask (1 keep, 0 paper)
+  let roughMask=null;
+  if(roughAmt>0){roughMask=new Float32Array(n);const md=Math.min(W,H)*0.13*roughAmt;const rr=mulberry32(((p.seed>>>0)||1)+7);const edgeN=fbmArray([14,5],W,H,rng);for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){const d=Math.min(x,y,W-1-x,H-1-y);const thr=md*(0.4+edgeN[i]);roughMask[i]=d>thr?1:0;}}
 
   // texture mapping
   const texOp=p.texOp/100, useTex=tex&&texOp>0&&mode==='normal';
@@ -366,83 +490,130 @@ function renderCore(p, raw, W, H, tex){
     return [blendCh(R,tv,tMode,eo),blendCh(G,tv,tMode,eo),blendCh(B,tv,tMode,eo)];
   }
 
-  if(p.colorMode!=='cmyk'){
-    // ---------- MONO ----------
-    const c=p.contrast,inv=p.invert;
+  // copy-of-copy degradation on a coverage field (ink=high, 0..1)
+  function degradeCov(cov){
+    if(gens<=1)return cov;
+    let c=cov;
+    for(let g=2;g<=gens;g++){
+      const nx=new Float32Array(n);
+      for(let i=0;i<n;i++){let v=(c[i]-0.5)*1.08+0.5;v+=(noiseHash(((i*g)%W),((i/W)|0))-0.5)*0.05;nx[i]=v<0?0:v>1?1:v;}
+      c=maxFilter(nx,1,W,H);
+    }
+    return c;
+  }
+  // continuous coverage from a plate "tone" buffer (ink=low) at offset (ox,oy) with optional rotation
+  function buildCont(soft,ox,oy,rot){
+    const cont=new Float32Array(n);
+    const cs=rot?Math.cos(rot):1, sn=rot?Math.sin(rot):0;
+    for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){
+      let sx=x,sy=y;
+      if(rot){const rx=x-cx,ry=y-cy;sx=cx+rx*cs-ry*sn;sy=cy+rx*sn+ry*cs;}
+      const wx=wxA[i]*warpAmt+skewSlope*(y-cy), wy=wyA[i]*warpAmt;
+      let val=sampleSoft(soft,sx+ox+wx,sy+oy+wy,W,H)+crA[i]*crustAmt;
+      let c=clamp01((th-val)/band+0.5);c=applyGain(c,dg);
+      if(roughMask)c*=roughMask[i];
+      cont[i]=c;
+    }
+    return cont;
+  }
+  // screen a continuous coverage field into a 0..1 ink field
+  function screenField(cont,ang,freq,plClK){
+    const t=new Float32Array(n);
+    if(screenType==='cont'){for(let i=0;i<n;i++)t[i]=cont[i];return t;}
+    if(screenType==='fm'){
+      const err=Float32Array.from(cont);
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;const old=err[i];const nw=old>=0.5?1:0;t[i]=nw;const e=old-nw;
+        if(x+1<W)err[i+1]+=e*0.4375;if(y+1<H){if(x>0)err[i+W-1]+=e*0.1875;err[i+W]+=e*0.3125;if(x+1<W)err[i+W+1]+=e*0.0625;}}
+      return t;
+    }
+    if(screenType==='bayer'){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;t[i]=cont[i]>BAYER8[(y&7)*8+(x&7)]?1:0;}return t;}
+    if(screenType==='stoch'){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;t[i]=cont[i]>noiseHash((x*131+1),(y*137+1))?1:0;}return t;}
+    const a=ang*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a), aa=0.06;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;const cc=cont[i];if(cc<=0){t[i]=0;continue;}
+      const u=x*ca-y*sa, v=x*sa+y*ca;
+      if(screenType==='line'){const cv=v/freq,dv=cv-Math.round(cv),R=cc*0.5;t[i]=clamp01((R-Math.abs(dv))/aa+0.5);}
+      else if(screenType==='cross'){const cu=u/freq,cv=v/freq,du=cu-Math.round(cu),dv=cv-Math.round(cv),R=cc*0.5;t[i]=Math.max(clamp01((R-Math.abs(du))/aa+0.5),clamp01((R-Math.abs(dv))/aa+0.5));}
+      else{const cu=u/freq,cv=v/freq;let du=cu-Math.round(cu),dv=cv-Math.round(cv),dist,R;
+        if(dotShape==='square'){dist=Math.max(Math.abs(du),Math.abs(dv));R=Math.sqrt(clamp01(cc))*0.5;}
+        else if(dotShape==='ellipse'){dist=Math.sqrt(du*du*1.7+dv*dv*0.6);R=Math.sqrt(clamp01(cc))*0.72;}
+        else{dist=Math.sqrt(du*du+dv*dv);R=Math.sqrt(clamp01(cc))*0.71;}
+        t[i]=clamp01((R-dist)/aa+0.5);}
+    }
+    return t;
+  }
+
+  const inv=p.invert, c=p.contrast;
+  const isMono=p.colorMode!=='cmyk';
+  const misRotRad=(p.misRot||0)*Math.PI/180;
+  // ---- build plate list: {cov, col, ang, off, rot} ----
+  const plates=[];
+  if(isMono){
     const gray=new Float32Array(n);
     for(let i=0,q=0;i<n;i++,q+=4){let l=0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2];l=(l-128)*c+128;if(inv)l=255-l;gray[i]=l<0?0:l>255?255:l;}
-    let tone=boxBlur(minFilter(gray,p.bleed,W,H),blurR,W,H);
-    if(streakLen>0)tone=streak(tone,ddx,ddy,streakLen,W,H);
-    const ink=p.ink,paper=p.paper;
-    const speckP=p.speck/100*0.06, dropP=p.drop/100*0.10;
-    for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){
-      let val=sampleSoft(tone,x+wxA[i]*warpAmt,y+wyA[i]*warpAmt,W,H)+crA[i]*crustAmt;
-      let cont=clamp01((th-val)/band+0.5); cont=applyGain(cont,dg);
-      let t=ht?htDot(cont,x,y,p.htAngK,htFreq):cont;
-      const nz=noiseHash(x,y);
-      if(t<1&&nz<speckP)t=1;else if(t>0&&noiseHash(x+7,y+13)<dropP)t=0;
-      let dim=1;if(vigAmt>0){const d=Math.sqrt((x-cx)*(x-cx)+(y-cy)*(y-cy))/maxR;dim=1-d*d*vigAmt;}
-      const papM=fbA[i]*2*fiberAmp;
-      let R=(paper[0]+papM)*(1-t*(1-ink[0]/255))*dim;
-      let G=(paper[1]+papM)*(1-t*(1-ink[1]/255))*dim;
-      let B=(paper[2]+papM)*(1-t*(1-ink[2]/255))*dim;
-      const o=applyTex(R,G,B,x,y,t);R=o[0];G=o[1];B=o[2];
-      const q=i*4;
-      if(mode==='inkAlpha'){out[q]=clampB(ink[0]+(255-ink[0])*(1-t));out[q+1]=clampB(ink[1]+(255-ink[1])*(1-t));out[q+2]=clampB(ink[2]+(255-ink[2])*(1-t));out[q+3]=clampB(t*255);}
-      else if(mode==='sep'){const g2=255*(1-t);out[q]=g2;out[q+1]=g2;out[q+2]=g2;out[q+3]=255;}
-      else{out[q]=clampB(R);out[q+1]=clampB(G);out[q+2]=clampB(B);out[q+3]=255;}
-    }
+    let cov=new Float32Array(n);for(let i=0;i<n;i++)cov[i]=1-gray[i]/255;
+    plates.push({cov,col:p.ink,ang:p.htAngK,off:[0,0],rot:0});
+  } else if(p.separation==='spot'){
+    const lum=new Float32Array(n);
+    for(let i=0,q=0;i<n;i++,q+=4){let l=(0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2])/255;l=clamp01((l-0.5)*c+0.5);if(inv)l=1-l;lum[i]=1-l;} // 0 light .. 1 dark
+    (p.spotInks||[]).forEach((ink,k)=>{
+      const cen=ink.center, wid=Math.max(0.05,ink.width), gam=ink.gamma||1;
+      const cov=new Float32Array(n);
+      for(let i=0;i<n;i++){let d=Math.abs(lum[i]-cen)/wid;let v=clamp01(1-d);cov[i]=Math.pow(v,1/gam);}
+      plates.push({cov,col:ink.col,ang:(ink.ang!=null?ink.ang:[15,75,0,45][k%4]),off:[0,0],rot:0});
+    });
   } else {
-    // ---------- CMYK / spot ----------
-    const c=p.contrast,inv=p.invert,rich=p.rich;
-    const covC=new Float32Array(n),covM=new Float32Array(n),covY=new Float32Array(n),covK=new Float32Array(n);
+    const covC=new Float32Array(n),covM=new Float32Array(n),covY=new Float32Array(n),covK=new Float32Array(n),rich=p.rich;
     for(let i=0,q=0;i<n;i++,q+=4){
-      let r=raw[q]/255,g=raw[q+1]/255,b=raw[q+2]/255;
-      if(inv){r=1-r;g=1-g;b=1-b;}
+      let r=raw[q]/255,g=raw[q+1]/255,b=raw[q+2]/255;if(inv){r=1-r;g=1-g;b=1-b;}
       r=clamp01((r-0.5)*c+0.5);g=clamp01((g-0.5)*c+0.5);b=clamp01((b-0.5)*c+0.5);
-      const k=1-Math.max(r,g,b);let C=0,M=0,Y=0;
-      if(k<1){const ik=1-k;C=(1-r-k)/ik;M=(1-g-k)/ik;Y=(1-b-k)/ik;}
+      const k=1-Math.max(r,g,b);let C=0,M=0,Y=0;if(k<1){const ik=1-k;C=(1-r-k)/ik;M=(1-g-k)/ik;Y=(1-b-k)/ik;}
       if(rich>0){C=Math.min(1,C+k*rich);M=Math.min(1,M+k*rich);Y=Math.min(1,Y+k*rich);}
       covC[i]=C;covM[i]=M;covY[i]=Y;covK[i]=k;
     }
-    const en=p.plateOn; // [C,M,Y,K] booleans
-    const sC=en[0]?plateSoft(covC,p.bleed,blurR,ddx,ddy,streakLen,W,H):null;
-    const sM=en[1]?plateSoft(covM,p.bleed,blurR,ddx,ddy,streakLen,W,H):null;
-    const sY=en[2]?plateSoft(covY,p.bleed,blurR,ddx,ddy,streakLen,W,H):null;
-    const sK=en[3]?plateSoft(covK,p.bleed,blurR,ddx,ddy,streakLen,W,H):null;
-    const mis=p.mis, rot=p.misRot*Math.PI/180;
-    // base offsets per plate (K anchored)
-    const off=[[-mis,-mis*0.45],[mis*0.85,-mis*0.55],[mis*0.25,mis*0.95],[0,0]];
-    const ang=[p.htAngC,p.htAngM,p.htAngY,p.htAngK];
-    const col=[p.colC,p.colM,p.colY,p.colK];
-    const softs=[sC,sM,sY,sK], covs=[covC,covM,covY,covK];
-    for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){
-      const wx=wxA[i]*warpAmt, wy=wyA[i]*warpAmt, cr=crA[i]*crustAmt;
-      // per-plate slight rotation about centre
-      let R=(p.paper[0]+fbA[i]*2*fiberAmp), G=(p.paper[1]+fbA[i]*2*fiberAmp), B=(p.paper[2]+fbA[i]*2*fiberAmp);
-      const tArr=[0,0,0,0]; let inkMax=0;
-      for(let pl=0;pl<4;pl++){
-        if(!softs[pl])continue;
-        let ox=off[pl][0],oy=off[pl][1];
-        if(rot!==0){const rx=x-cx,ry=y-cy,s=(pl===3?0:(pl-1))*rot;const cs=Math.cos(s),sn=Math.sin(s);ox+=(rx*cs-ry*sn)-rx;oy+=(rx*sn+ry*cs)-ry;}
-        let val=sampleSoft(softs[pl],x+ox+wx,y+oy+wy,W,H)+cr;
-        let cont=clamp01((th-val)/band+0.5); cont=applyGain(cont,dg);
-        let t=ht?htDot(cont,x,y,ang[pl],htFreq):cont;
-        tArr[pl]=t; if(t>inkMax)inkMax=t;
-        if(mode!=='sep'){const cc=col[pl];R*=(1-t*(1-cc[0]/255));G*=(1-t*(1-cc[1]/255));B*=(1-t*(1-cc[2]/255));}
-      }
-      let dim=1;if(vigAmt>0){const d=Math.sqrt((x-cx)*(x-cx)+(y-cy)*(y-cy))/maxR;dim=1-d*d*vigAmt;}
-      R*=dim;G*=dim;B*=dim;
-      const q=i*4;
-      if(mode==='sep'){const idx={C:0,M:1,Y:2,K:3}[sep]||0;const g2=255*(1-tArr[idx]);out[q]=g2;out[q+1]=g2;out[q+2]=g2;out[q+3]=255;}
-      else if(mode==='inkAlpha'){
-        let r2=255,g2=255,b2=255;
-        for(let pl=0;pl<4;pl++){if(!softs[pl])continue;const cc=col[pl],t=tArr[pl];r2*=(1-t*(1-cc[0]/255));g2*=(1-t*(1-cc[1]/255));b2*=(1-t*(1-cc[2]/255));}
-        out[q]=clampB(r2);out[q+1]=clampB(g2);out[q+2]=clampB(b2);out[q+3]=clampB(inkMax*255);
-      } else {
-        const o=applyTex(R,G,B,x,y,inkMax);out[q]=clampB(o[0]);out[q+1]=clampB(o[1]);out[q+2]=clampB(o[2]);out[q+3]=255;
-      }
+    const mis=p.mis;const offs=[[-mis,-mis*0.45],[mis*0.85,-mis*0.55],[mis*0.25,mis*0.95],[0,0]];
+    const rots=[-misRotRad,0,misRotRad,0];
+    const cols=[p.colC,p.colM,p.colY,p.colK],angs=[p.htAngC,p.htAngM,p.htAngY,p.htAngK],covs=[covC,covM,covY,covK];
+    for(let pl=0;pl<4;pl++){if(p.plateOn[pl])plates.push({cov:covs[pl],col:cols[pl],ang:angs[pl],off:offs[pl],rot:rots[pl]});}
+  }
+
+  // ---- process each plate → ink field ----
+  const tFields=[], contFields=[];
+  for(const pl of plates){
+    let cov=pl.cov;
+    if(trap>0)cov=maxFilter(cov,trap,W,H);else if(trap<0)cov=minFilter(cov,-trap,W,H);
+    cov=degradeCov(cov);
+    const soft=plateSoft(cov,p.bleed,blurR,ddx,ddy,streakLen,W,H);
+    const cont=buildCont(soft,pl.off[0],pl.off[1],pl.rot);
+    contFields.push(cont);
+    tFields.push(screenField(cont,pl.ang,htFreq,pl.col));
+  }
+
+  // ---- coverage export modes ----
+  if(mode==='cov'||mode==='covcont'){
+    const src=(mode==='covcont'?contFields:tFields)[Math.min(sepIdx,tFields.length-1)]||new Float32Array(n);
+    for(let i=0;i<n;i++){const g2=255*(1-src[i]);const q=i*4;out[q]=g2;out[q+1]=g2;out[q+2]=g2;out[q+3]=255;}
+    return out;
+  }
+
+  // ---- composite ----
+  const paper=p.paper, speckP=p.speck/100*0.06, dropP=p.drop/100*0.10;
+  for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){
+    const papM=fbA[i]*2*fiberAmp;
+    let R=paper[0]+papM,G=paper[1]+papM,B=paper[2]+papM, inkMax=0;
+    for(let k=0;k<plates.length;k++){
+      let t=tFields[k][i];
+      if(isMono){const nz=noiseHash(x,y);if(t<1&&nz<speckP)t=1;else if(t>0&&noiseHash(x+7,y+13)<dropP)t=0;tFields[k][i]=t;}
+      if(t>inkMax)inkMax=t;
+      const cc=plates[k].col;R*=(1-t*(1-cc[0]/255));G*=(1-t*(1-cc[1]/255));B*=(1-t*(1-cc[2]/255));
     }
+    let dim=1;if(vigAmt>0){const d=Math.sqrt((x-cx)*(x-cx)+(y-cy)*(y-cy))/maxR;dim=1-d*d*vigAmt;}
+    R*=dim;G*=dim;B*=dim;
+    if(streakAmt>0){const sf=1-streakRow[y];R*=sf;G*=sf;B*=sf;}
+    if(leakAmt>0){const dx=(x-lkx)/W,dy=(y-lky)/H;const dd=Math.sqrt(dx*dx+dy*dy);const f=Math.max(0,1-dd*1.3);const li=leakAmt*f*f*120;R+=li;G+=li*0.92;B+=li*0.72;}
+    const q=i*4;
+    if(mode==='sep'){const tf=tFields[Math.min(sepIdx,tFields.length-1)]||null;const g2=tf?255*(1-tf[i]):255;out[q]=g2;out[q+1]=g2;out[q+2]=g2;out[q+3]=255;}
+    else if(mode==='inkAlpha'){let r2=255,g2=255,b2=255;for(let k=0;k<plates.length;k++){const cc=plates[k].col,t=tFields[k][i];r2*=(1-t*(1-cc[0]/255));g2*=(1-t*(1-cc[1]/255));b2*=(1-t*(1-cc[2]/255));}out[q]=clampB(r2);out[q+1]=clampB(g2);out[q+2]=clampB(b2);out[q+3]=clampB(inkMax*255);}
+    else{const o=applyTex(R,G,B,x,y,inkMax);out[q]=clampB(o[0]);out[q+1]=clampB(o[1]);out[q+2]=clampB(o[2]);out[q+3]=255;}
   }
   return out;
 }
@@ -472,9 +643,9 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- i18n ----------
   const T={
-    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir"},
-    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko"},
-    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace"}
+    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES"},
+    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU"},
+    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES"}
   };
   let lang='es';
   function applyLang(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[lang][k]!=null)el.textContent=T[lang][k];});document.documentElement.lang=lang;}
@@ -484,9 +655,11 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   const RISO=[['#252525','Black'],['#ff48b0','Fluo Pink'],['#0078bf','Blue'],['#00a95c','Green'],['#ff6f00','Orange'],['#765aa6','Purple'],['#e2452b','Vermilion'],['#f2ead9','Cream']];
   const state={
     contrast:1.4,threshold:128,bleed:2,warp:45,crust:45,soft:13,dirA:90,dirAmt:0,
-    halftone:false,htFreq:6,dotgain:0.2,speck:10,drop:6,fiber:12,vig:22,
+    halftone:false,screenType:'cont',dotShape:'round',htFreq:6,dotgain:0.2,speck:10,drop:6,fiber:12,vig:22,
     colorMode:'mono',ink:'#1c1c1c',paper:'#f2ead9',invert:false,
-    mis:5,misRot:0,rich:0.55,
+    mis:5,misRot:0,rich:0.55,trap:0,generations:1,
+    skew:0,degStreak:0,degLeak:0,degLeakCorner:0,degRough:0,
+    separation:'cmyk',spotInks:[{col:'#252525',center:0.8,width:0.5,gamma:1,ang:45},{col:'#ff48b0',center:0.35,width:0.45,gamma:1,ang:75}],
     plateOn:[true,true,true,true],colC:'#009cde',colM:'#ec008c',colY:'#fff200',colK:'#1a171b',
     texMode:'multiply',texApply:'all',texOp:0,texScale:1,texId:null,seed:1234,
     htAngC:15,htAngM:75,htAngY:0,htAngK:45
@@ -494,11 +667,13 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   function hexToRgb(h){const v=parseInt(h.slice(1),16);return [(v>>16)&255,(v>>8)&255,v&255];}
   function buildParams(mode,sep){
     return {contrast:state.contrast,threshold:state.threshold,bleed:state.bleed,warp:state.warp,crust:state.crust,soft:state.soft,
-      dirA:state.dirA,dirAmt:state.dirAmt,halftone:state.halftone,htFreq:state.htFreq,dotgain:state.dotgain,speck:state.speck,drop:state.drop,
-      fiber:state.fiber,vig:state.vig,colorMode:state.colorMode,invert:state.invert,mis:state.mis,misRot:state.misRot,rich:state.rich,
+      dirA:state.dirA,dirAmt:state.dirAmt,halftone:state.halftone,screenType:state.screenType,dotShape:state.dotShape,htFreq:state.htFreq,dotgain:state.dotgain,speck:state.speck,drop:state.drop,
+      fiber:state.fiber,vig:state.vig,colorMode:state.colorMode,invert:state.invert,mis:state.mis,misRot:state.misRot,rich:state.rich,trap:state.trap,generations:state.generations,
+      skew:state.skew,degStreak:state.degStreak,degLeak:state.degLeak,degLeakCorner:state.degLeakCorner,degRough:state.degRough,separation:state.separation,
+      spotInks:state.spotInks.map(s=>({col:hexToRgb(s.col),center:s.center,width:s.width,gamma:s.gamma,ang:s.ang})),
       plateOn:state.plateOn.slice(),seed:state.seed,texMode:state.texMode,texApply:state.texApply,texOp:state.texOp,texScale:state.texScale,
       ink:hexToRgb(state.ink),paper:hexToRgb(state.paper),colC:hexToRgb(state.colC),colM:hexToRgb(state.colM),colY:hexToRgb(state.colY),colK:hexToRgb(state.colK),
-      htAngC:state.htAngC,htAngM:state.htAngM,htAngY:state.htAngY,htAngK:state.htAngK,mode:mode||'normal',sep:sep||null};
+      htAngC:state.htAngC,htAngM:state.htAngM,htAngY:state.htAngY,htAngK:state.htAngK,mode:mode||'normal',sep:sep!=null?sep:null};
   }
 
   // ---------- worker ----------
@@ -560,7 +735,8 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
       cv.width=d.W;cv.height=d.H;ctx.putImageData(img,0,0);
       if(job&&job.kind==='full')stage.classList.remove('working');
     }else if(job.kind==='download'){
-      const c=document.createElement('canvas');c.width=d.W;c.height=d.H;c.getContext('2d').putImageData(img,0,0);
+      const c=document.createElement('canvas');c.width=d.W;c.height=d.H;const cc2=c.getContext('2d');cc2.putImageData(img,0,0);
+      if(typeof showMarks!=='undefined'&&showMarks&&typeof drawMarks==='function')drawMarks(cc2,d.W,d.H);
       c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=job.fname;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},'image/png');
       if(sepQueue.length)runSepQueue();
     }
@@ -568,6 +744,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   let fullTimer=null;
   function scheduleRender(){
     if(!srcImg)return;
+    if(typeof scheduleHist==='function')scheduleHist();
     stage.classList.add('working');
     postRender(rawPrev,'preview',buildParams('normal'));
     clearTimeout(fullTimer);
@@ -580,7 +757,9 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     warp:['warp','vWarp',0],crust:['crust','vCrust',0],soft:['soft','vSoft',0],dirAmt:['dirAmt','vDirAmt',0],
     htFreq:['htFreq','vHtFreq',1],dotgain:['dotgain','vDotgain',2],speck:['speck','vSpeck',0],drop:['drop2','vDrop',0],
     fiber:['fiber','vFiber',0],vig:['vig','vVig',0],texOp:['texOp','vTexOp',0],texScale:['texScale','vTexScale',2],
-    mis:['mis','vMis',0],misRot:['misRot','vMisRot',1]
+    mis:['mis','vMis',0],misRot:['misRot','vMisRot',1],
+    trap:['trap','vTrap',0],generations:['generations','vGenerations',0],
+    degStreak:['degStreak','vDegStreak',2],degLeak:['degLeak','vDegLeak',2],degRough:['degRough','vDegRough',2]
   };
   Object.entries(sliders).forEach(([key,[id,vid,dec]])=>{
     const el=$(id),v=$(vid);
@@ -592,7 +771,6 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- toggles ----------
   function toggle(elId,key,after){const el=$(elId);el.addEventListener('click',()=>{state[key]=!state[key];el.classList.toggle('on',state[key]);if(after)after();scheduleRender();});}
-  toggle('htToggle','halftone',()=>{$('htFreq').disabled=!state.halftone;});
   toggle('invertToggle','invert');
 
   // ---------- color mode ----------
@@ -647,23 +825,23 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- presets ----------
   const PRESETS={
-    xerox:{contrast:1.7,threshold:140,bleed:3,warp:55,crust:55,soft:11,halftone:false,dotgain:0.15,speck:22,drop:14,fiber:14,vig:35,colorMode:'mono',ink:'#1c1c1c',paper:'#f2ead9'},
-    riso:{contrast:1.3,threshold:120,bleed:2,warp:35,crust:30,soft:16,halftone:false,dotgain:0.25,speck:6,drop:4,fiber:8,vig:15,colorMode:'cmyk',mis:7,rich:0.6,plateOn:[false,true,false,true],colM:'#ff48b0',colK:'#252525'},
-    offset:{contrast:1.25,threshold:128,bleed:1,warp:18,crust:22,soft:20,halftone:true,htFreq:6,dotgain:0.3,fiber:6,vig:18,colorMode:'cmyk',mis:6,rich:0.4},
-    news:{contrast:1.2,threshold:125,bleed:1,warp:30,crust:70,soft:14,halftone:true,htFreq:5,dotgain:0.4,speck:30,drop:6,fiber:6,vig:20,colorMode:'mono',ink:'#1c1c1c',paper:'#e8e3d3'}
+    xerox:{contrast:1.7,threshold:140,bleed:3,warp:55,crust:55,soft:11,screenType:'cont',dotgain:0.15,speck:22,drop:14,fiber:14,vig:35,colorMode:'mono',ink:'#1c1c1c',paper:'#f2ead9',generations:1,trap:0,degStreak:0,degLeak:0,degRough:0,skew:0},
+    riso:{contrast:1.3,threshold:120,bleed:2,warp:35,crust:30,soft:16,screenType:'cont',dotgain:0.25,speck:6,drop:4,fiber:8,vig:15,colorMode:'cmyk',separation:'cmyk',mis:7,rich:0.6,plateOn:[false,true,false,true],colM:'#ff48b0',colK:'#252525',generations:1,trap:0},
+    offset:{contrast:1.25,threshold:128,bleed:1,warp:18,crust:22,soft:20,screenType:'am',dotShape:'round',htFreq:6,dotgain:0.3,fiber:6,vig:18,colorMode:'cmyk',separation:'cmyk',mis:6,rich:0.4,plateOn:[true,true,true,true]},
+    news:{contrast:1.2,threshold:125,bleed:1,warp:30,crust:70,soft:14,screenType:'am',dotShape:'round',htFreq:5,dotgain:0.4,speck:30,drop:6,fiber:6,vig:20,colorMode:'mono',ink:'#1c1c1c',paper:'#e8e3d3'}
   };
   function applyPreset(o){Object.assign(state,JSON.parse(JSON.stringify(o)));reflectAll();scheduleRender();}
   $('presets').addEventListener('click',e=>{const p=e.target.dataset.preset;if(p&&PRESETS[p])applyPreset(PRESETS[p]);});
   function reflectAll(){
     Object.entries(sliders).forEach(([key,[id,vid,dec]])=>{if(state[key]==null)return;$(id).value=state[key];$(vid).textContent=dec?(+state[key]).toFixed(dec):state[key];});
     $('dirA').value=state.dirA;$('vDirA').textContent=state.dirA+'°';
-    $('htToggle').classList.toggle('on',state.halftone);$('htFreq').disabled=!state.halftone;
     $('invertToggle').classList.toggle('on',state.invert);
     document.querySelectorAll('#colorMode button').forEach(b=>b.classList.toggle('on',b.dataset.c===state.colorMode));
     $('monoCol').classList.toggle('hidden',state.colorMode!=='mono');$('cmykCol').classList.toggle('hidden',state.colorMode!=='cmyk');$('grainGroup').style.display=state.colorMode==='cmyk'?'none':'';
     $('inkColor').value=state.ink;$('paperColor').value=state.paper;$('paperColor2').value=state.paper;
     plateDefs.forEach(([lbl,key,idx])=>{const row=platesEl.children[idx];row.querySelector('.toggle').classList.toggle('on',state.plateOn[idx]);row.querySelector('input[type=color]').value=state[key];});
     syncSeg('texMode','m',state.texMode);syncSeg('texApply','a',state.texApply);
+    reflectV3();
   }
   // user presets via localStorage
   const LS='fotokopia_presets';
@@ -708,6 +886,269 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   let sepQueue=[];
   function runSepQueue(){if(!sepQueue.length)return;const s=sepQueue.shift();exportRender(FULL_DIM,'sep',s,expName('_'+s));}
   $('exportSep').addEventListener('click',()=>{if(!srcImg)return;sepQueue=['C','M','Y','K'];runSepQueue();});
+
+  // ===== v3 wiring =====
+  // skew (shows °)
+  $('skew').addEventListener('input',e=>{state.skew=parseFloat(e.target.value);$('vSkew').textContent=state.skew.toFixed(1)+'°';scheduleRender();});
+  // screen type / dot shape
+  function setHtFreqEnabled(){const t=state.screenType;$('htFreq').disabled=!(t==='am'||t==='line'||t==='cross');}
+  $('screenType').addEventListener('click',e=>{const s=e.target.dataset.s;if(!s)return;state.screenType=s;syncSeg('screenType','s',s);setHtFreqEnabled();scheduleRender();});
+  $('dotShape').addEventListener('click',e=>{const d=e.target.dataset.d;if(!d)return;state.dotShape=d;syncSeg('dotShape','d',d);scheduleRender();});
+  setHtFreqEnabled();
+  // separation
+  $('separation').addEventListener('click',e=>{const s=e.target.dataset.s;if(!s)return;state.separation=s;syncSeg('separation','s',s);$('cmykPlates').classList.toggle('hidden',s!=='cmyk');$('spotEditor').classList.toggle('hidden',s!=='spot');scheduleRender();});
+  // leak corner
+  $('degLeakCorner').addEventListener('click',e=>{const k=e.target.dataset.k;if(k==null)return;state.degLeakCorner=parseInt(k,10);syncSeg('degLeakCorner','k',k);scheduleRender();});
+  // per-plate angles
+  const anglesEl=$('angles'), angleInputs={};
+  [['C','htAngC'],['M','htAngM'],['Y','htAngY'],['K','htAngK']].forEach(([lbl,key])=>{
+    const d=document.createElement('div');d.className='a';d.innerHTML='<span>'+lbl+' <b id="va'+key+'">'+state[key]+'</b>°</span>';
+    const inp=document.createElement('input');inp.type='range';inp.min='0';inp.max='90';inp.step='1';inp.value=state[key];
+    inp.addEventListener('input',()=>{state[key]=parseFloat(inp.value);$('va'+key).textContent=state[key];scheduleRender();});
+    d.appendChild(inp);anglesEl.appendChild(d);angleInputs[key]=inp;
+  });
+  // spot inks editor
+  function renderSpotInks(){
+    const wrap=$('spotInks');wrap.innerHTML='';
+    state.spotInks.forEach((ink,idx)=>{
+      const row=document.createElement('div');row.className='spotink';
+      const col=document.createElement('input');col.type='color';col.value=ink.col;col.addEventListener('input',()=>{ink.col=col.value;scheduleRender();});
+      const c1=document.createElement('div');c1.className='mini';c1.innerHTML='<span>TONO</span>';const s1=document.createElement('input');s1.type='range';s1.min='0';s1.max='1';s1.step='0.02';s1.value=ink.center;s1.addEventListener('input',()=>{ink.center=parseFloat(s1.value);scheduleRender();});c1.appendChild(s1);
+      const c2=document.createElement('div');c2.className='mini';c2.innerHTML='<span>ANCHO</span>';const s2=document.createElement('input');s2.type='range';s2.min='0.1';s2.max='1';s2.step='0.02';s2.value=ink.width;s2.addEventListener('input',()=>{ink.width=parseFloat(s2.value);scheduleRender();});c2.appendChild(s2);
+      const del=document.createElement('button');del.className='del';del.textContent='×';del.addEventListener('click',()=>{if(state.spotInks.length>1){state.spotInks.splice(idx,1);renderSpotInks();scheduleRender();}});
+      row.appendChild(col);row.appendChild(c1);row.appendChild(c2);row.appendChild(del);wrap.appendChild(row);
+    });
+  }
+  $('addSpot').addEventListener('click',()=>{if(state.spotInks.length<6){state.spotInks.push({col:'#0078bf',center:0.5,width:0.4,gamma:1,ang:15});renderSpotInks();scheduleRender();}});
+  renderSpotInks();
+  // reflect v3 controls (called from reflectAll)
+  function reflectV3(){
+    syncSeg('screenType','s',state.screenType);syncSeg('dotShape','d',state.dotShape);setHtFreqEnabled();
+    syncSeg('separation','s',state.separation);$('cmykPlates').classList.toggle('hidden',state.separation!=='cmyk');$('spotEditor').classList.toggle('hidden',state.separation!=='spot');
+    syncSeg('degLeakCorner','k',String(state.degLeakCorner));
+    $('skew').value=state.skew;$('vSkew').textContent=(+state.skew).toFixed(1)+'°';
+    ['htAngC','htAngM','htAngY','htAngK'].forEach(key=>{if(angleInputs[key]){angleInputs[key].value=state[key];const b=$('va'+key);if(b)b.textContent=state[key];}});
+    renderSpotInks();
+  }
+
+  // ---------- history (undo/redo) ----------
+  const SAVE_KEYS=Object.keys(state).filter(k=>k!=='texId');
+  function stateForSave(){const o={};SAVE_KEYS.forEach(k=>o[k]=state[k]);return JSON.parse(JSON.stringify(o));}
+  function loadState(o){if(!o)return;Object.keys(o).forEach(k=>{if(k in state&&k!=='texId')state[k]=o[k];});}
+  let hist=[],hi=-1,histLock=false,histTimer=null;
+  function histPush(){if(histLock)return;const s=JSON.stringify(stateForSave());if(hi>=0&&hist[hi]===s)return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>80){hist.shift();}hi=hist.length-1;}
+  function scheduleHist(){clearTimeout(histTimer);histTimer=setTimeout(histPush,450);}
+  function histApply(){histLock=true;loadState(JSON.parse(hist[hi]));reflectAll();histLock=false;scheduleRender();}
+  $('undo').addEventListener('click',()=>{if(hi>0){hi--;histApply();}});
+  $('redo').addEventListener('click',()=>{if(hi<hist.length-1){hi++;histApply();}});
+
+  // ---------- URL / JSON state ----------
+  function encodeState(){return btoa(unescape(encodeURIComponent(JSON.stringify(stateForSave()))));}
+  function decodeState(s){try{return JSON.parse(decodeURIComponent(escape(atob(s))));}catch(e){return null;}}
+  function flash(btn){const t=btn.innerHTML;btn.innerHTML='✓';setTimeout(()=>btn.innerHTML=t,800);}
+  $('shareBtn').addEventListener('click',()=>{history.replaceState(null,'','#s='+encodeState());if(navigator.clipboard)navigator.clipboard.writeText(location.href);flash($('shareBtn'));});
+  $('expJson').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(stateForSave(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
+  $('impJson').addEventListener('click',()=>$('jsonFile').click());
+  $('jsonFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{loadState(JSON.parse(r.result));reflectAll();histPush();scheduleRender();}catch(err){alert('JSON inválido');}};r.readAsText(f);});
+
+  // ---------- registration / crop marks ----------
+  let showMarks=false;
+  $('marksBtn').addEventListener('click',()=>{showMarks=!showMarks;$('marksBtn').classList.toggle('on',showMarks);});
+  function drawMarks(g,W,H){
+    const m=Math.max(14,Math.min(W,H)*0.035), L=m*0.8, lw=Math.max(1,W/1100);
+    g.save();g.strokeStyle='#111';g.lineWidth=lw;
+    const corners=[[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]];
+    corners.forEach(c=>{const x=c[0],y=c[1],sx=c[2],sy=c[3];g.beginPath();g.moveTo(x+sx*m*0.2,y+sy*lw);g.lineTo(x+sx*(m*0.2+L),y+sy*lw);g.moveTo(x+sx*lw,y+sy*m*0.2);g.lineTo(x+sx*lw,y+sy*(m*0.2+L));g.stroke();});
+    function reg(cx,cy){const r=m*0.42;g.beginPath();g.arc(cx,cy,r,0,Math.PI*2);g.stroke();g.beginPath();g.moveTo(cx-r*1.6,cy);g.lineTo(cx+r*1.6,cy);g.moveTo(cx,cy-r*1.6);g.lineTo(cx,cy+r*1.6);g.stroke();}
+    reg(W/2,m*0.7);reg(W/2,H-m*0.7);
+    g.restore();
+  }
+
+  // ---------- SVG vector export ----------
+  function platesInfo(){
+    if(state.colorMode!=='cmyk')return [{col:state.ink,ang:state.htAngK}];
+    if(state.separation==='spot')return state.spotInks.map((ink,k)=>({col:ink.col,ang:(ink.ang!=null?ink.ang:[15,75,0,45][k%4])}));
+    const cols=[state.colC,state.colM,state.colY,state.colK],angs=[state.htAngC,state.htAngM,state.htAngY,state.htAngK],list=[];
+    for(let pl=0;pl<4;pl++)if(state.plateOn[pl])list.push({col:cols[pl],ang:angs[pl]});return list;
+  }
+  function buildSVG(){
+    if(state.screenType!=='am'){alert('El SVG vectorial requiere trama tipo Punto (AM). Cambia el tipo de trama a Punto.');return null;}
+    const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,freq=state.htFreq,shape=state.dotShape,info=platesInfo();
+    const diag=Math.sqrt(W*W+H*H),N=Math.ceil(diag/freq);
+    let svg='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">\n';
+    svg+='<rect width="'+W+'" height="'+H+'" fill="'+state.paper+'"/>\n';
+    let total=0;
+    for(let pi=0;pi<info.length;pi++){
+      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null);
+      const a=info[pi].ang*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);
+      let g='<g fill="'+info[pi].col+'">';
+      for(let iv=-N;iv<=N;iv++)for(let iu=-N;iu<=N;iu++){
+        const u=iu*freq,v=iv*freq,x=u*ca+v*sa,y=-u*sa+v*ca;
+        if(x<0||x>=W||y<0||y>=H)continue;
+        const c=1-buf[((y|0)*W+(x|0))*4]/255;if(c<=0.02)continue;
+        const r=Math.sqrt(c)*0.71*freq;total++;
+        if(shape==='square'){const hh=Math.sqrt(c)*0.5*freq;g+='<rect x="'+(x-hh).toFixed(1)+'" y="'+(y-hh).toFixed(1)+'" width="'+(hh*2).toFixed(1)+'" height="'+(hh*2).toFixed(1)+'" transform="rotate('+info[pi].ang.toFixed(1)+' '+x.toFixed(1)+' '+y.toFixed(1)+')"/>';}
+        else if(shape==='ellipse'){const rx=(Math.sqrt(c)*0.72/Math.sqrt(1.7)*freq).toFixed(1),ry=(Math.sqrt(c)*0.72/Math.sqrt(0.6)*freq).toFixed(1);g+='<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx+'" ry="'+ry+'" transform="rotate('+info[pi].ang.toFixed(1)+' '+x.toFixed(1)+' '+y.toFixed(1)+')"/>';}
+        else g+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'"/>';
+      }
+      g+='</g>\n';svg+=g;
+      if(total>700000){alert('Demasiados puntos para SVG; sube la Frecuencia.');return null;}
+    }
+    if(showMarks)svg+=svgMarks(W,H);
+    svg+='</svg>\n';return svg;
+  }
+  function svgMarks(W,H){const m=Math.max(14,Math.min(W,H)*0.035),L=m*0.8;let s='<g stroke="#111" stroke-width="'+Math.max(1,W/1100).toFixed(1)+'" fill="none">';
+    [[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(c=>{const x=c[0],y=c[1],sx=c[2],sy=c[3];s+='<path d="M'+(x+sx*m*0.2)+' '+y+' L'+(x+sx*(m*0.2+L))+' '+y+' M'+x+' '+(y+sy*m*0.2)+' L'+x+' '+(y+sy*(m*0.2+L))+'"/>';});
+    function reg(cx,cy){const r=m*0.42;s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'"/><path d="M'+(cx-r*1.6)+' '+cy+' L'+(cx+r*1.6)+' '+cy+' M'+cx+' '+(cy-r*1.6)+' L'+cx+' '+(cy+r*1.6)+'"/>';}
+    reg(W/2,m*0.7);reg(W/2,H-m*0.7);return s+'</g>\n';}
+  $('exportSvg').addEventListener('click',()=>{if(!srcImg)return;const svg=buildSVG();if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
+
+  // ===== advanced exports =====
+  let tileCols=2,tileRows=2,textSize=220,textFont='Bebas Neue',vidFrames=36,vidMode='seed';
+  $('tileCols').addEventListener('input',e=>tileCols=Math.max(1,parseInt(e.target.value||'1',10)));
+  $('tileRows').addEventListener('input',e=>tileRows=Math.max(1,parseInt(e.target.value||'1',10)));
+  $('textSize').addEventListener('input',e=>{textSize=parseInt(e.target.value,10);$('vTextSize').textContent=textSize;});
+  $('textFont').addEventListener('click',e=>{const f=e.target.dataset.f;if(!f)return;textFont=f;syncSeg('textFont','f',f);});
+  $('vidFrames').addEventListener('input',e=>{vidFrames=parseInt(e.target.value,10);$('vVidFrames').textContent=vidFrames;});
+  $('vidMode').addEventListener('click',e=>{const v=e.target.dataset.v;if(!v)return;vidMode=v;syncSeg('vidMode','v',v);});
+  function b64ToBytes(b64){const bin=atob(b64),len=bin.length,a=new Uint8Array(len);for(let i=0;i<len;i++)a[i]=bin.charCodeAt(i);return a;}
+  function downloadBytes(bytes,name,mime){const blob=new Blob([bytes],{type:mime});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
+  function downloadText(txt,name,mime){downloadBytes(new TextEncoder().encode(txt),name,mime||'text/plain');}
+
+  // ---- HPGL / DXF (line-screen pen geometry) ----
+  function buildLineGeometry(){
+    const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,freq=Math.max(3,state.htFreq),info=platesInfo();
+    const diag=Math.sqrt(W*W+H*H),N=Math.ceil(diag/freq),step=1.3,out=[];
+    for(let pi=0;pi<info.length;pi++){
+      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null);
+      const a=info[pi].ang*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a),polys=[];
+      for(let iv=-N;iv<=N;iv++){const v=iv*freq;let cur=null;
+        for(let s=-diag;s<=diag;s+=step){const x=s*ca+v*sa,y=-s*sa+v*ca;
+          if(x<0||x>=W||y<0||y>=H){if(cur){if(cur.length>1)polys.push(cur);cur=null;}continue;}
+          const c=1-buf[((y|0)*W+(x|0))*4]/255;
+          if(c>0.5){if(!cur)cur=[];cur.push([Math.round(x),Math.round(y)]);}else{if(cur){if(cur.length>1)polys.push(cur);cur=null;}}
+        }
+        if(cur&&cur.length>1)polys.push(cur);
+      }
+      out.push({col:info[pi].col,polys});
+    }
+    return {plates:out,W,H};
+  }
+  function toHPGL(geo){let s='IN;SP1;';geo.plates.forEach((pl,i)=>{s+='SP'+(i+1)+';';pl.polys.forEach(poly=>{s+='PU'+poly[0][0]+','+(geo.H-poly[0][1])+';PD'+poly.map(p=>p[0]+','+(geo.H-p[1])).join(',')+';';});});return s+'PU;SP0;';}
+  function toDXF(geo){let s='0\nSECTION\n2\nENTITIES\n';geo.plates.forEach((pl,i)=>{const layer='PLATE'+(i+1);pl.polys.forEach(poly=>{for(let k=0;k<poly.length-1;k++){const A=poly[k],B=poly[k+1];s+='0\nLINE\n8\n'+layer+'\n10\n'+A[0]+'\n20\n'+(geo.H-A[1])+'\n11\n'+B[0]+'\n21\n'+(geo.H-B[1])+'\n';}});});return s+'0\nENDSEC\n0\nEOF\n';}
+  $('exportHpgl').addEventListener('click',()=>{if(!srcImg)return;const g=buildLineGeometry();downloadText(toHPGL(g),'fotokopia_'+Date.now()+'.hpgl','application/vnd.hp-hpgl');});
+  $('exportDxf').addEventListener('click',()=>{if(!srcImg)return;const g=buildLineGeometry();downloadText(toDXF(g),'fotokopia_'+Date.now()+'.dxf','application/dxf');});
+
+  // ---- PDF multipage separations (hand-rolled, JPEG/DCTDecode) ----
+  function concatBytes(chunks){let len=0;chunks.forEach(c=>len+=c.length);const out=new Uint8Array(len);let o=0;chunks.forEach(c=>{out.set(c,o);o+=c.length;});return out;}
+  function assemblePDF(jpegs,W,H){
+    const enc=s=>new TextEncoder().encode(s),chunks=[];let len=0;const offsets=[];
+    function push(b){const bytes=(typeof b==='string')?enc(b):b;chunks.push(bytes);len+=bytes.length;}
+    function obj(){offsets.push(len);}
+    push('%PDF-1.4\n');
+    const nPages=jpegs.length,total=2+nPages*3;
+    obj();push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+    const kids=[];for(let k=0;k<nPages;k++)kids.push((5+k*3)+' 0 R');
+    obj();push('2 0 obj\n<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+nPages+' >>\nendobj\n');
+    for(let k=0;k<nPages;k++){
+      const imgN=3+k*3,contN=4+k*3,pageN=5+k*3,jpg=jpegs[k];
+      obj();push(imgN+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+W+' /Height '+H+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n');push(jpg);push('\nendstream\nendobj\n');
+      const content='q\n'+W+' 0 0 '+H+' 0 0 cm\n/Im0 Do\nQ\n';
+      obj();push(contN+' 0 obj\n<< /Length '+enc(content).length+' >>\nstream\n'+content+'endstream\nendobj\n');
+      obj();push(pageN+' 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources << /XObject << /Im0 '+imgN+' 0 R >> >> /Contents '+contN+' 0 R >>\nendobj\n');
+    }
+    const xrefStart=len;
+    let xref='xref\n0 '+(total+1)+'\n0000000000 65535 f \n';
+    for(let i=0;i<total;i++){xref+=(''+offsets[i]).padStart(10,'0')+' 00000 n \n';}
+    push(xref);push('trailer\n<< /Size '+(total+1)+' /Root 1 0 R >>\nstartxref\n'+xrefStart+'\n%%EOF');
+    return concatBytes(chunks);
+  }
+  $('exportPdf').addEventListener('click',()=>{
+    if(!srcImg)return;
+    const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,info=platesInfo(),jpegs=[];
+    for(let pi=0;pi<info.length;pi++){
+      const buf=window.renderCore(buildParams('sep',pi),raw.u8,W,H,null);
+      const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
+      if(showMarks)drawMarks(g,W,H);
+      jpegs.push(b64ToBytes(c.toDataURL('image/jpeg',0.92).split(',')[1]));
+    }
+    downloadBytes(assemblePDF(jpegs,W,H),'fotokopia_separaciones_'+Date.now()+'.pdf','application/pdf');
+  });
+
+  // ---- tiling ----
+  $('exportTiles').addEventListener('click',()=>{
+    if(!srcImg)return;
+    const raw=makeRaw(Math.min(3000,FULL_DIM*2)),W=raw.W,H=raw.H;
+    const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
+    const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,tex);
+    const full=document.createElement('canvas');full.width=W;full.height=H;full.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
+    const tw=Math.ceil(W/tileCols),th=Math.ceil(H/tileRows);let delay=0;
+    for(let r=0;r<tileRows;r++)for(let cc=0;cc<tileCols;cc++){
+      const t=document.createElement('canvas');t.width=tw;t.height=th;t.getContext('2d').drawImage(full,cc*tw,r*th,tw,th,0,0,tw,th);
+      const name='fotokopia_tile_r'+r+'_c'+cc+'.png';
+      setTimeout(()=>t.toBlob(b=>downloadBytes(b,name,'image/png'),'image/png'),delay);delay+=350;
+    }
+  });
+
+  // ---- text as image ----
+  $('useText').addEventListener('click',()=>{
+    const txt=($('textInput').value||'FOTOKOPIA').split('\n'),pad=textSize*0.35;
+    const meas=document.createElement('canvas').getContext('2d');meas.font='700 '+textSize+'px "'+textFont+'", sans-serif';
+    let maxW=10;txt.forEach(l=>maxW=Math.max(maxW,meas.measureText(l).width));
+    const c=document.createElement('canvas');c.width=Math.ceil(maxW+pad*2);c.height=Math.ceil(txt.length*textSize*1.12+pad*2);
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.fillStyle='#000';g.textBaseline='top';g.font='700 '+textSize+'px "'+textFont+'", sans-serif';
+    txt.forEach((l,i)=>g.fillText(l,pad,pad+i*textSize*1.12));
+    const img=new Image();img.onload=()=>{srcImg=img;beforeImg.src=img.src;rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);dropEl.classList.add('hidden');hint.classList.remove('hidden');cv.classList.remove('hidden');view={z:1,x:0,y:0};applyView();scheduleRender();};img.src=c.toDataURL();
+  });
+
+  // ---- batch ----
+  $('batchBtn').addEventListener('click',()=>$('batchFile').click());
+  $('batchFile').addEventListener('change',async e=>{
+    const files=[...e.target.files];e.target.value='';
+    for(const f of files){await new Promise(res=>{
+      const url=URL.createObjectURL(f),img=new Image();
+      img.onload=()=>{const s=Math.min(1,FULL_DIM/Math.max(img.naturalWidth,img.naturalHeight)),W=Math.round(img.naturalWidth*s),H=Math.round(img.naturalHeight*s);
+        off.width=W;off.height=H;offc.drawImage(img,0,0,W,H);const u8=new Uint8ClampedArray(offc.getImageData(0,0,W,H).data);
+        const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
+        const buf=window.renderCore(buildParams('normal'),u8,W,H,tex);
+        const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
+        if(showMarks)drawMarks(g,W,H);
+        c.toBlob(b=>{downloadBytes(b,'fk_'+f.name.replace(/\.[^.]+$/,'')+'.png','image/png');setTimeout(()=>{URL.revokeObjectURL(url);res();},450);},'image/png');
+      };img.onerror=()=>res();img.src=url;
+    });}
+    if(srcImg){rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);scheduleRender();}
+  });
+
+  // ---- WebM video (animate seed or misregistration) ----
+  $('recordVid').addEventListener('click',async ()=>{
+    if(!srcImg)return;
+    if(typeof MediaRecorder==='undefined'){alert('MediaRecorder no disponible en este navegador.');return;}
+    const raw=makeRaw(900),W=raw.W,H=raw.H;
+    const rc=document.createElement('canvas');rc.width=W;rc.height=H;const rg=rc.getContext('2d');
+    const stream=rc.captureStream(0),track=stream.getVideoTracks()[0];
+    let mime='video/webm;codecs=vp9';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:9000000}),chunks=[];
+    rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)chunks.push(ev.data);};
+    const done=new Promise(r=>rec.onstop=r);
+    const btn=$('recordVid'),lab=btn.innerHTML;btn.disabled=true;
+    rec.start();
+    const baseSeed=state.seed,baseMis=state.mis,tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
+    for(let f=0;f<vidFrames;f++){
+      const p=buildParams('normal');
+      if(vidMode==='seed')p.seed=baseSeed+f*7+1;else p.mis=Math.max(0,baseMis+Math.sin(f/vidFrames*Math.PI*2)*7);
+      const buf=window.renderCore(p,raw.u8,W,H,tex);
+      rg.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
+      if(track.requestFrame)track.requestFrame();
+      btn.innerHTML=Math.round((f+1)/vidFrames*100)+'%';
+      await new Promise(r=>setTimeout(r,1000/24));
+    }
+    rec.stop();await done;
+    downloadBytes(new Blob(chunks,{type:'video/webm'}),'fotokopia_'+Date.now()+'.webm','video/webm');
+    btn.disabled=false;btn.innerHTML=lab;
+  });
+
+  // load state from URL hash, then init history
+  (function(){const mm=location.hash.match(/#s=(.+)/);if(mm){const o=decodeState(mm[1]);if(o){loadState(o);reflectAll();}}histPush();})();
 
   applyLang();
 })();
