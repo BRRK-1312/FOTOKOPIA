@@ -88,6 +88,22 @@
   .spotink .mini{display:flex;flex-direction:column}
   .spotink .mini span{color:var(--dim);font-size:8px;letter-spacing:.5px}
   .spotink .del{background:transparent;border:1px solid var(--line);color:var(--dim);cursor:pointer;height:24px}
+  .layerrow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .layerrow .pl{width:46px;color:var(--dim);letter-spacing:1px;font-size:10px}
+  .layerrow .ly{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);font-family:'JetBrains Mono';font-size:9px;letter-spacing:.5px;padding:6px;cursor:pointer;text-align:center}
+  .layerrow .ly.has{border-color:var(--gold);color:var(--gold)}
+  .layerrow .clr{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--dim);cursor:pointer;height:26px;width:26px}
+  .overlay{position:fixed;inset:0;background:rgba(8,8,8,.92);z-index:50;display:flex;flex-direction:column}
+  .overlay.hidden{display:none}
+  .ov-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--gold)}
+  .ov-x{background:transparent;border:1px solid var(--line);color:var(--ink);font-size:18px;width:34px;height:34px;cursor:pointer}
+  .ab-cv{flex:1;display:flex;gap:2px;padding:16px;min-height:0}
+  .ab-cv canvas{flex:1;min-width:0;object-fit:contain;background:var(--paper);max-height:100%}
+  .gal-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:18px;align-content:start}
+  .gal-cell{cursor:pointer;border:1px solid var(--line);background:var(--panel-2);transition:.12s}
+  .gal-cell:hover{border-color:var(--gold)}
+  .gal-cell canvas{width:100%;display:block;background:var(--paper)}
+  .gal-cell .nm{padding:7px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink);text-align:center}
   .footer{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
   .btn{width:100%;padding:11px;border:none;cursor:pointer;font-family:'Bebas Neue';font-size:17px;letter-spacing:3px;background:var(--vermillion);color:#fff;transition:.12s}
   .btn:hover{background:#ff5337}
@@ -178,6 +194,12 @@
         </div>
         <div class="ctrl"><label><span data-i18n="ht_freq">Frecuencia (px)</span><span class="val" id="vHtFreq">6</span></label><input type="range" id="htFreq" min="3" max="20" step="0.5" value="6" disabled></div>
         <div class="ctrl"><label><span data-i18n="dotgain">Ganancia de punto</span><span class="val" id="vDotgain">0.20</span></label><input type="range" id="dotgain" min="0" max="1.2" step="0.01" value="0.2"></div>
+        <div class="ctrl"><label data-i18n="paper_profile">Perfil de papel</label>
+          <div class="seg" id="paperProfile" style="grid-template-columns:repeat(5,1fr)">
+            <button data-pp="offset" class="on" data-i18n="pp_offset">Offset</button><button data-pp="coated" data-i18n="pp_coated">Couché</button><button data-pp="uncoated" data-i18n="pp_uncoated">Offset+</button><button data-pp="news" data-i18n="pp_news">Prensa</button><button data-pp="porous" data-i18n="pp_porous">Poroso</button>
+          </div>
+        </div>
+        <div class="ctrl"><label class="toggle" id="htAAToggle"><span class="box"></span> <span data-i18n="htaa">Antialias de trama (2×)</span></label></div>
         <div class="ctrl"><label><span data-i18n="trap">Trapping (choke/spread)</span><span class="val" id="vTrap">0</span></label><input type="range" id="trap" min="-3" max="3" step="1" value="0"></div>
         <div class="ctrl"><label><span data-i18n="generations">Copia de copia</span><span class="val" id="vGenerations">1</span></label><input type="range" id="generations" min="1" max="6" step="1" value="1"></div>
       </div>
@@ -233,6 +255,7 @@
           <div class="ctrl"><label><span data-i18n="mis">Misregistration</span><span class="val" id="vMis">5</span></label><input type="range" id="mis" min="0" max="24" step="1" value="5"></div>
           <div class="ctrl"><label><span data-i18n="misrot">Rotación plancha</span><span class="val" id="vMisRot">0.0</span></label><input type="range" id="misRot" min="0" max="3" step="0.1" value="0"></div>
           <div class="ctrl"><label><span data-i18n="rich">Riqueza CMY</span><span class="val" id="vRich">0.55</span></label><input type="range" id="rich" min="0" max="1" step="0.01" value="0.55"></div>
+          <div class="ctrl"><label><span data-i18n="gcr">GCR / UCR (negro)</span><span class="val" id="vGcr">0</span></label><input type="range" id="gcr" min="0" max="1" step="0.02" value="0"></div>
           <div class="ctrl"><span class="cap" data-i18n="c_paper">PAPEL</span><input type="color" id="paperColor2" value="#f2ead9"></div>
         </div>
         <div class="ctrl" style="margin-top:14px"><label class="toggle" id="invertToggle"><span class="box"></span> <span data-i18n="invert">Invertir</span></label></div>
@@ -284,6 +307,32 @@
     </div>
 
     <div class="group collapsed" data-g>
+      <h3 data-i18n="g_pro">Pro / Print</h3>
+      <div class="body">
+        <span class="cap" data-i18n="curves">CURVAS POR PLANCHA</span>
+        <div class="seg" id="lvPlate" style="grid-template-columns:repeat(4,1fr);margin-bottom:8px"></div>
+        <div class="ctrl"><label><span data-i18n="lv_lo">Negro (in)</span><span class="val" id="vLvLo">0.00</span></label><input type="range" id="lvLo" min="0" max="0.9" step="0.02" value="0"></div>
+        <div class="ctrl"><label><span data-i18n="lv_hi">Blanco (in)</span><span class="val" id="vLvHi">1.00</span></label><input type="range" id="lvHi" min="0.1" max="1" step="0.02" value="1"></div>
+        <div class="ctrl"><label><span data-i18n="lv_g">Gamma</span><span class="val" id="vLvG">1.00</span></label><input type="range" id="lvG" min="0.3" max="3" step="0.05" value="1"></div>
+
+        <span class="cap" data-i18n="layers" style="margin-top:14px">CAPAS POR PLANCHA (MULTICAPA)</span>
+        <div id="layerList"></div>
+
+        <span class="cap" data-i18n="histo" style="margin-top:14px">HISTOGRAMA POR PLANCHA</span>
+        <canvas id="histCanvas" width="298" height="90" style="width:100%;height:90px;background:var(--panel-2);border:1px solid var(--line);display:block"></canvas>
+        <div id="clipWarn" style="color:var(--gold);font-size:10px;letter-spacing:1px;margin-top:6px;min-height:12px"></div>
+        <button class="btn ghost sm" id="analyzeBtn" data-i18n="analyze" style="margin-top:6px">ANALIZAR PLANCHAS</button>
+
+        <span class="cap" data-i18n="ab" style="margin-top:14px">COMPARADOR A/B</span>
+        <div class="row2"><button class="btn ghost sm" id="storeA">GUARDAR A</button><button class="btn ghost sm" id="storeB">GUARDAR B</button></div>
+        <button class="btn ghost sm" id="viewAB" data-i18n="view_ab" style="margin-top:8px">VER A | B</button>
+
+        <span class="cap" data-i18n="gallery" style="margin-top:14px">GALERÍA DE PRESETS</span>
+        <button class="btn ghost sm" id="galleryBtn" data-i18n="open_gallery">ABRIR GALERÍA</button>
+      </div>
+    </div>
+
+    <div class="group collapsed" data-g>
       <h3 data-i18n="g_advanced">Avanzado</h3>
       <div class="body">
         <span class="cap" data-i18n="adv_vector">SALIDA VECTORIAL / PRINT</span>
@@ -317,6 +366,8 @@
         <button class="btn ghost sm" id="recordVid" data-i18n="vid_rec">GRABAR WEBM</button>
 
         <span class="cap" data-i18n="adv_batch" style="margin-top:14px">PROCESO POR LOTES</span>
+        <input type="text" id="batchName" value="fk_{name}" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);font-family:'JetBrains Mono';font-size:11px;padding:6px;margin-bottom:8px" placeholder="fk_{name}">
+        <label class="toggle" id="zipToggle" style="margin-bottom:8px"><span class="box"></span> <span data-i18n="zip">Empaquetar en ZIP</span></label>
         <button class="btn ghost sm" id="batchBtn" data-i18n="batch">PROCESAR VARIAS IMÁGENES</button>
       </div>
     </div>
@@ -354,6 +405,16 @@
 <input type="file" id="texFile" accept="image/*" class="hidden">
 <input type="file" id="jsonFile" accept="application/json,.json" class="hidden">
 <input type="file" id="batchFile" accept="image/*" multiple class="hidden">
+<input type="file" id="layerFile" accept="image/*" class="hidden">
+
+<div id="abOverlay" class="overlay hidden">
+  <div class="ov-head"><span>A | B</span><button class="ov-x" id="abClose">×</button></div>
+  <div class="ab-cv"><canvas id="cvA"></canvas><canvas id="cvB"></canvas></div>
+</div>
+<div id="galOverlay" class="overlay hidden">
+  <div class="ov-head"><span data-i18n="gallery">GALERÍA DE PRESETS</span><button class="ov-x" id="galClose">×</button></div>
+  <div class="gal-grid" id="galGrid"></div>
+</div>
 
 <!-- ===== pipeline (runs in a Web Worker; also eval'd on main as fallback) ===== -->
 <script id="core" type="text/js-worker">
@@ -422,7 +483,27 @@ function htDot(cont,x,y,angDeg,freq){
   const R=Math.sqrt(clamp01(cont))*0.71,aa=0.06;
   return clamp01((R-dist)/aa+0.5);
 }
-function applyGain(c,g){return g<=0?c:Math.pow(clamp01(c),1/(1+g*2));}
+function dotGain(c,g,profile){
+  if(g<=0)return c<0?0:c>1?1:c;
+  c=clamp01(c);
+  const shape=Math.sin(Math.PI*c); // midtone-weighted (0 at ends, 1 at mid)
+  let amt=g, skew=0;
+  if(profile==='coated'){amt*=0.55;}
+  else if(profile==='uncoated'){amt*=1.2;}
+  else if(profile==='news'){amt*=1.55;skew=0.12;}
+  else if(profile==='porous'){amt*=1.95;skew=0.2;}
+  const s2=shape*(1+skew*(c-0.5)*2);
+  return clamp01(c+amt*0.5*s2);
+}
+const _fbmCache={};
+function getFields(seed,W,H){
+  const key=seed+'_'+W+'_'+H;
+  if(_fbmCache[key])return _fbmCache[key];
+  const rng=mulberry32((seed>>>0)||1);
+  const f={wxA:fbmArray([42,19,8],W,H,rng),wyA:fbmArray([38,17,7],W,H,rng),crA:fbmArray([9,4,2],W,H,rng),fbA:fiberArray(W,H,rng)};
+  const ks=Object.keys(_fbmCache);if(ks.length>6)delete _fbmCache[ks[0]];
+  _fbmCache[key]=f;return f;
+}
 
 // build plate "tone" buffer (ink=low 0..255) from a coverage field (0..1)
 function plateSoft(cov,bleed,blurR,dxN,dyN,streakLen,W,H){
@@ -443,16 +524,17 @@ function maxFilter(buf,r,W,H){
 const BAYER8=(function(){const m=[0,32,8,40,2,34,10,42,48,16,56,24,50,18,58,26,12,44,4,36,14,46,6,38,60,28,52,20,62,30,54,22,3,35,11,43,1,33,9,41,51,19,59,27,49,17,57,25,15,47,7,39,13,45,5,37,63,31,55,23,61,29,53,21];return m.map(v=>(v+0.5)/64);})();
 
 // ---- main entry: returns Uint8ClampedArray RGBA ----
-function renderCore(p, raw, W, H, tex){
+function renderCore(p, raw, W, H, tex, layers){
   const n=W*H, out=new Uint8ClampedArray(n*4);
-  const rng=mulberry32((p.seed>>>0)||1);
-  const wxA=fbmArray([42,19,8],W,H,rng), wyA=fbmArray([38,17,7],W,H,rng), crA=fbmArray([9,4,2],W,H,rng), fbA=fiberArray(W,H,rng);
+  const rng=mulberry32(((p.seed>>>0)||1)^0x9e3779b9);
+  const F=getFields(p.seed,W,H), wxA=F.wxA, wyA=F.wyA, crA=F.crA, fbA=F.fbA;
   const warpAmt=p.warp/120*7, crustAmt=p.crust/120*80;
   const fiberAmp=p.fiber/60*36, vigAmt=p.vig/100, th=p.threshold, band=p.soft;
   const blurR=Math.max(2,p.bleed+1);
   const cx=W/2,cy=H/2,maxR=Math.sqrt(cx*cx+cy*cy);
   const dirRad=p.dirA*Math.PI/180, ddx=Math.cos(dirRad), ddy=Math.sin(dirRad), streakLen=p.dirAmt;
-  const dg=p.dotgain, htFreq=p.htFreq;
+  const dg=p.dotgain, htFreq=p.htFreq, paperProfile=p.paperProfile||'offset', htAA=!!p.htAA;
+  const gcr=p.gcr||0, levels=p.levels||{}, hasLayers=layers&&Object.keys(layers).length>0;
   const screenType=p.screenType||(p.halftone?'am':'cont'), dotShape=p.dotShape||'round';
   const gens=Math.max(1,p.generations||1), trap=p.trap||0;
   const skewSlope=Math.tan((p.skew||0)*Math.PI/180);
@@ -510,7 +592,7 @@ function renderCore(p, raw, W, H, tex){
       if(rot){const rx=x-cx,ry=y-cy;sx=cx+rx*cs-ry*sn;sy=cy+rx*sn+ry*cs;}
       const wx=wxA[i]*warpAmt+skewSlope*(y-cy), wy=wyA[i]*warpAmt;
       let val=sampleSoft(soft,sx+ox+wx,sy+oy+wy,W,H)+crA[i]*crustAmt;
-      let c=clamp01((th-val)/band+0.5);c=applyGain(c,dg);
+      let c=clamp01((th-val)/band+0.5);c=dotGain(c,dg,paperProfile);
       if(roughMask)c*=roughMask[i];
       cont[i]=c;
     }
@@ -529,15 +611,19 @@ function renderCore(p, raw, W, H, tex){
     if(screenType==='bayer'){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;t[i]=cont[i]>BAYER8[(y&7)*8+(x&7)]?1:0;}return t;}
     if(screenType==='stoch'){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;t[i]=cont[i]>noiseHash((x*131+1),(y*137+1))?1:0;}return t;}
     const a=ang*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a), aa=0.06;
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;const cc=cont[i];if(cc<=0){t[i]=0;continue;}
+    function screenAt(x,y,cc){
       const u=x*ca-y*sa, v=x*sa+y*ca;
-      if(screenType==='line'){const cv=v/freq,dv=cv-Math.round(cv),R=cc*0.5;t[i]=clamp01((R-Math.abs(dv))/aa+0.5);}
-      else if(screenType==='cross'){const cu=u/freq,cv=v/freq,du=cu-Math.round(cu),dv=cv-Math.round(cv),R=cc*0.5;t[i]=Math.max(clamp01((R-Math.abs(du))/aa+0.5),clamp01((R-Math.abs(dv))/aa+0.5));}
-      else{const cu=u/freq,cv=v/freq;let du=cu-Math.round(cu),dv=cv-Math.round(cv),dist,R;
-        if(dotShape==='square'){dist=Math.max(Math.abs(du),Math.abs(dv));R=Math.sqrt(clamp01(cc))*0.5;}
-        else if(dotShape==='ellipse'){dist=Math.sqrt(du*du*1.7+dv*dv*0.6);R=Math.sqrt(clamp01(cc))*0.72;}
-        else{dist=Math.sqrt(du*du+dv*dv);R=Math.sqrt(clamp01(cc))*0.71;}
-        t[i]=clamp01((R-dist)/aa+0.5);}
+      if(screenType==='line'){const cv=v/freq,dv=cv-Math.round(cv),R=cc*0.5;return clamp01((R-Math.abs(dv))/aa+0.5);}
+      if(screenType==='cross'){const cu=u/freq,cv=v/freq,du=cu-Math.round(cu),dv=cv-Math.round(cv),R=cc*0.5;return Math.max(clamp01((R-Math.abs(du))/aa+0.5),clamp01((R-Math.abs(dv))/aa+0.5));}
+      const cu=u/freq,cv=v/freq;let du=cu-Math.round(cu),dv=cv-Math.round(cv),dist,R;
+      if(dotShape==='square'){dist=Math.max(Math.abs(du),Math.abs(dv));R=Math.sqrt(clamp01(cc))*0.5;}
+      else if(dotShape==='ellipse'){dist=Math.sqrt(du*du*1.7+dv*dv*0.6);R=Math.sqrt(clamp01(cc))*0.72;}
+      else{dist=Math.sqrt(du*du+dv*dv);R=Math.sqrt(clamp01(cc))*0.71;}
+      return clamp01((R-dist)/aa+0.5);
+    }
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;const cc=cont[i];if(cc<=0){t[i]=0;continue;}
+      if(htAA){t[i]=0.25*(screenAt(x-0.25,y-0.25,cc)+screenAt(x+0.25,y-0.25,cc)+screenAt(x-0.25,y+0.25,cc)+screenAt(x+0.25,y+0.25,cc));}
+      else t[i]=screenAt(x,y,cc);
     }
     return t;
   }
@@ -545,41 +631,60 @@ function renderCore(p, raw, W, H, tex){
   const inv=p.invert, c=p.contrast;
   const isMono=p.colorMode!=='cmyk';
   const misRotRad=(p.misRot||0)*Math.PI/180;
-  // ---- build plate list: {cov, col, ang, off, rot} ----
+  function layerCov(layer){
+    const cov=new Float32Array(n), lum=layer.lum, lw=layer.w, lh=layer.h, sx=lw/W, sy=lh/H;
+    for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){
+      let fx=x*sx, fy=y*sy; if(fx>lw-1)fx=lw-1; if(fy>lh-1)fy=lh-1;
+      const xi=fx|0,yi=fy|0,tx=fx-xi,ty=fy-yi,xi1=xi<lw-1?xi+1:xi,yi1=yi<lh-1?yi+1:yi,r0=yi*lw,r1=yi1*lw;
+      const a=lum[r0+xi]*(1-tx)+lum[r0+xi1]*tx,b=lum[r1+xi]*(1-tx)+lum[r1+xi1]*tx;let l=a*(1-ty)+b*ty;
+      if(inv)l=1-l;l=clamp01((l-0.5)*c+0.5);cov[i]=1-l;
+    }
+    return cov;
+  }
+  function applyLevels(cov,lv){
+    if(!lv)return cov;const lo=lv.lo||0,hi=(lv.hi==null?1:lv.hi),g=lv.g||1;
+    if(lo===0&&hi===1&&g===1)return cov;
+    const o=new Float32Array(cov.length),inv2=1/Math.max(0.001,hi-lo);
+    for(let i=0;i<cov.length;i++){let v=(cov[i]-lo)*inv2;v=v<0?0:v>1?1:v;o[i]=g===1?v:Math.pow(v,g);}
+    return o;
+  }
+  // ---- build plate list: {cov, col, ang, off, rot, key} ----
   const plates=[];
   if(isMono){
-    const gray=new Float32Array(n);
-    for(let i=0,q=0;i<n;i++,q+=4){let l=0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2];l=(l-128)*c+128;if(inv)l=255-l;gray[i]=l<0?0:l>255?255:l;}
-    let cov=new Float32Array(n);for(let i=0;i<n;i++)cov[i]=1-gray[i]/255;
-    plates.push({cov,col:p.ink,ang:p.htAngK,off:[0,0],rot:0});
+    let cov;
+    if(layers&&layers.K)cov=layerCov(layers.K);
+    else{const gray=new Float32Array(n);for(let i=0,q=0;i<n;i++,q+=4){let l=0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2];l=(l-128)*c+128;if(inv)l=255-l;gray[i]=l<0?0:l>255?255:l;}cov=new Float32Array(n);for(let i=0;i<n;i++)cov[i]=1-gray[i]/255;}
+    plates.push({cov,col:p.ink,ang:p.htAngK,off:[0,0],rot:0,key:'K'});
   } else if(p.separation==='spot'){
     const lum=new Float32Array(n);
-    for(let i=0,q=0;i<n;i++,q+=4){let l=(0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2])/255;l=clamp01((l-0.5)*c+0.5);if(inv)l=1-l;lum[i]=1-l;} // 0 light .. 1 dark
+    for(let i=0,q=0;i<n;i++,q+=4){let l=(0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2])/255;l=clamp01((l-0.5)*c+0.5);if(inv)l=1-l;lum[i]=1-l;}
     (p.spotInks||[]).forEach((ink,k)=>{
-      const cen=ink.center, wid=Math.max(0.05,ink.width), gam=ink.gamma||1;
-      const cov=new Float32Array(n);
-      for(let i=0;i<n;i++){let d=Math.abs(lum[i]-cen)/wid;let v=clamp01(1-d);cov[i]=Math.pow(v,1/gam);}
-      plates.push({cov,col:ink.col,ang:(ink.ang!=null?ink.ang:[15,75,0,45][k%4]),off:[0,0],rot:0});
+      const key='s'+k;let cov;
+      if(layers&&layers[key])cov=layerCov(layers[key]);
+      else{const cen=ink.center,wid=Math.max(0.05,ink.width),gam=ink.gamma||1;cov=new Float32Array(n);for(let i=0;i<n;i++){let d=Math.abs(lum[i]-cen)/wid;let v=clamp01(1-d);cov[i]=Math.pow(v,1/gam);}}
+      plates.push({cov,col:ink.col,ang:(ink.ang!=null?ink.ang:[15,75,0,45][k%4]),off:[0,0],rot:0,key});
     });
   } else {
     const covC=new Float32Array(n),covM=new Float32Array(n),covY=new Float32Array(n),covK=new Float32Array(n),rich=p.rich;
     for(let i=0,q=0;i<n;i++,q+=4){
       let r=raw[q]/255,g=raw[q+1]/255,b=raw[q+2]/255;if(inv){r=1-r;g=1-g;b=1-b;}
       r=clamp01((r-0.5)*c+0.5);g=clamp01((g-0.5)*c+0.5);b=clamp01((b-0.5)*c+0.5);
-      const k=1-Math.max(r,g,b);let C=0,M=0,Y=0;if(k<1){const ik=1-k;C=(1-r-k)/ik;M=(1-g-k)/ik;Y=(1-b-k)/ik;}
+      let k=1-Math.max(r,g,b);let C=0,M=0,Y=0;if(k<1){const ik=1-k;C=(1-r-k)/ik;M=(1-g-k)/ik;Y=(1-b-k)/ik;}
+      if(gcr>0){const gray=Math.min(C,M,Y),mv=gcr*gray;C-=mv;M-=mv;Y-=mv;k=Math.min(1,k+mv);}
       if(rich>0){C=Math.min(1,C+k*rich);M=Math.min(1,M+k*rich);Y=Math.min(1,Y+k*rich);}
       covC[i]=C;covM[i]=M;covY[i]=Y;covK[i]=k;
     }
     const mis=p.mis;const offs=[[-mis,-mis*0.45],[mis*0.85,-mis*0.55],[mis*0.25,mis*0.95],[0,0]];
     const rots=[-misRotRad,0,misRotRad,0];
-    const cols=[p.colC,p.colM,p.colY,p.colK],angs=[p.htAngC,p.htAngM,p.htAngY,p.htAngK],covs=[covC,covM,covY,covK];
-    for(let pl=0;pl<4;pl++){if(p.plateOn[pl])plates.push({cov:covs[pl],col:cols[pl],ang:angs[pl],off:offs[pl],rot:rots[pl]});}
+    const keys=['C','M','Y','K'],cols=[p.colC,p.colM,p.colY,p.colK],angs=[p.htAngC,p.htAngM,p.htAngY,p.htAngK],covs=[covC,covM,covY,covK];
+    for(let pl=0;pl<4;pl++){if(p.plateOn[pl]){let cov=covs[pl];if(layers&&layers[keys[pl]])cov=layerCov(layers[keys[pl]]);plates.push({cov,col:cols[pl],ang:angs[pl],off:offs[pl],rot:rots[pl],key:keys[pl]});}}
   }
 
   // ---- process each plate → ink field ----
   const tFields=[], contFields=[];
   for(const pl of plates){
     let cov=pl.cov;
+    cov=applyLevels(cov,levels[pl.key]);
     if(trap>0)cov=maxFilter(cov,trap,W,H);else if(trap<0)cov=minFilter(cov,-trap,W,H);
     cov=degradeCov(cov);
     const soft=plateSoft(cov,p.bleed,blurR,ddx,ddy,streakLen,W,H);
@@ -620,14 +725,16 @@ function renderCore(p, raw, W, H, tex){
 
 // worker wiring (skipped when eval'd on the main thread)
 if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
-  const store={tex:{}};
+  const store={tex:{},layers:{}};
   self.onmessage=function(e){
     const d=e.data;
     if(d.t==='tex'){store.tex[d.id]={gray:new Float32Array(d.gray),w:d.w,h:d.h};return;}
+    if(d.t==='layer'){if(d.lum)store.layers[d.key]={lum:new Float32Array(d.lum),w:d.w,h:d.h};else delete store.layers[d.key];return;}
     if(d.t==='render'){
       const raw=new Uint8ClampedArray(d.raw);
       const tex=d.texId!=null?store.tex[d.texId]:null;
-      const buf=renderCore(d.params,raw,d.W,d.H,tex);
+      const layers=(d.useLayers!==false)?store.layers:null;
+      const buf=renderCore(d.params,raw,d.W,d.H,tex,layers);
       self.postMessage({t:'done',rid:d.rid,buf:buf.buffer,W:d.W,H:d.H,kind:d.kind,fname:d.fname},[buf.buffer]);
     }
   };
@@ -643,9 +750,9 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- i18n ----------
   const T={
-    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES"},
-    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU"},
-    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES"}
+    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES",g_pro:"Pro / Imprenta",curves:"CURVAS POR PLANCHA",lv_lo:"Negro (in)",lv_hi:"Blanco (in)",lv_g:"Gamma",layers:"CAPAS POR PLANCHA (MULTICAPA)",histo:"HISTOGRAMA POR PLANCHA",analyze:"ANALIZAR PLANCHAS",ab:"COMPARADOR A/B",view_ab:"VER A | B",gallery:"GALERÍA DE PRESETS",open_gallery:"ABRIR GALERÍA",paper_profile:"Perfil de papel",pp_offset:"Offset",pp_coated:"Couché",pp_uncoated:"Offset+",pp_news:"Prensa",pp_porous:"Poroso",htaa:"Antialias de trama (2×)",gcr:"GCR / UCR (negro)",zip:"Empaquetar en ZIP"},
+    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU",g_pro:"Pro / Inprenta",curves:"PLAKA BAKOITZAREN KURBAK",lv_lo:"Beltza (sar)",lv_hi:"Zuria (sar)",lv_g:"Gamma",layers:"PLAKA BAKOITZEKO GERUZAK",histo:"PLAKA BAKOITZAREN HISTOGRAMA",analyze:"PLAKAK AZTERTU",ab:"A/B KONPARATZAILEA",view_ab:"IKUSI A | B",gallery:"AURREZARPEN GALERIA",open_gallery:"GALERIA IREKI",paper_profile:"Paper profila",pp_offset:"Offset",pp_coated:"Kutxetua",pp_uncoated:"Offset+",pp_news:"Prentsa",pp_porous:"Porotsua",htaa:"Tramaren antialias (2×)",gcr:"GCR / UCR (beltza)",zip:"ZIP-en bildu"},
+    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES",g_pro:"Pro / Print",curves:"PER-PLATE CURVES",lv_lo:"Black (in)",lv_hi:"White (in)",lv_g:"Gamma",layers:"PER-PLATE LAYERS (MULTILAYER)",histo:"PER-PLATE HISTOGRAM",analyze:"ANALYZE PLATES",ab:"A/B COMPARE",view_ab:"VIEW A | B",gallery:"PRESET GALLERY",open_gallery:"OPEN GALLERY",paper_profile:"Paper profile",pp_offset:"Offset",pp_coated:"Coated",pp_uncoated:"Offset+",pp_news:"News",pp_porous:"Porous",htaa:"Screen antialias (2×)",gcr:"GCR / UCR (black)",zip:"Pack as ZIP"}
   };
   let lang='es';
   function applyLang(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[lang][k]!=null)el.textContent=T[lang][k];});document.documentElement.lang=lang;}
@@ -660,6 +767,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     mis:5,misRot:0,rich:0.55,trap:0,generations:1,
     skew:0,degStreak:0,degLeak:0,degLeakCorner:0,degRough:0,
     separation:'cmyk',spotInks:[{col:'#252525',center:0.8,width:0.5,gamma:1,ang:45},{col:'#ff48b0',center:0.35,width:0.45,gamma:1,ang:75}],
+    gcr:0,paperProfile:'offset',htAA:false,levels:{},
     plateOn:[true,true,true,true],colC:'#009cde',colM:'#ec008c',colY:'#fff200',colK:'#1a171b',
     texMode:'multiply',texApply:'all',texOp:0,texScale:1,texId:null,seed:1234,
     htAngC:15,htAngM:75,htAngY:0,htAngK:45
@@ -671,6 +779,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
       fiber:state.fiber,vig:state.vig,colorMode:state.colorMode,invert:state.invert,mis:state.mis,misRot:state.misRot,rich:state.rich,trap:state.trap,generations:state.generations,
       skew:state.skew,degStreak:state.degStreak,degLeak:state.degLeak,degLeakCorner:state.degLeakCorner,degRough:state.degRough,separation:state.separation,
       spotInks:state.spotInks.map(s=>({col:hexToRgb(s.col),center:s.center,width:s.width,gamma:s.gamma,ang:s.ang})),
+      gcr:state.gcr,paperProfile:state.paperProfile,htAA:state.htAA,levels:state.levels,
       plateOn:state.plateOn.slice(),seed:state.seed,texMode:state.texMode,texApply:state.texApply,texOp:state.texOp,texScale:state.texScale,
       ink:hexToRgb(state.ink),paper:hexToRgb(state.paper),colC:hexToRgb(state.colC),colM:hexToRgb(state.colM),colY:hexToRgb(state.colY),colK:hexToRgb(state.colK),
       htAngC:state.htAngC,htAngM:state.htAngM,htAngY:state.htAngY,htAngK:state.htAngK,mode:mode||'normal',sep:sep!=null?sep:null};
@@ -688,6 +797,28 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   }catch(err){useWorker=false;}
   if(!useWorker){ worker=null; }
   (0,eval)(coreText); // also define renderCore on main (fallback / worker runtime errors)
+
+  // ---------- per-plate layers (multilayer) ----------
+  const layerStore={}, layerDirty={};
+  function loadLayer(key,file){
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{const cap=1100,s=Math.min(1,cap/Math.max(img.width,img.height));const w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
+      const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.drawImage(img,0,0,w,h);const d=g.getImageData(0,0,w,h).data;
+      const lum=new Float32Array(w*h);for(let i=0,p=0;i<lum.length;i++,p+=4)lum[i]=(0.299*d[p]+0.587*d[p+1]+0.114*d[p+2])/255;
+      layerStore[key]={lum,w,h};layerDirty[key]=true;URL.revokeObjectURL(url);refreshLayerButtons();scheduleRender();};
+    img.src=url;
+  }
+  function clearLayer(key){delete layerStore[key];layerDirty[key]=true;refreshLayerButtons();scheduleRender();}
+  function ensureLayersSent(){
+    if(!useWorker)return;
+    Object.keys(layerDirty).forEach(key=>{
+      if(!layerDirty[key])return;layerDirty[key]=false;
+      const L=layerStore[key];
+      if(L){const copy=L.lum.slice();worker.postMessage({t:'layer',key,lum:copy.buffer,w:L.w,h:L.h},[copy.buffer]);}
+      else worker.postMessage({t:'layer',key,lum:null});
+    });
+  }
+  let refreshLayerButtons=()=>{};
 
   const sentTex={};
   function ensureTexSent(){
@@ -719,12 +850,12 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   function postRender(raw,kind,params,fname){
     const id=++rid; jobs[id]={kind,fname};
     if(useWorker){
-      ensureTexSent();
+      ensureTexSent();ensureLayersSent();
       const copy=raw.u8.slice();
       worker.postMessage({t:'render',rid:id,params,raw:copy.buffer,W:raw.W,H:raw.H,texId:(params.mode==='normal'?state.texId:null),kind,fname},[copy.buffer]);
     }else{
       const tex=(params.mode==='normal'&&state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
-      const buf=window.renderCore(params,raw.u8,raw.W,raw.H,tex);
+      const buf=window.renderCore(params,raw.u8,raw.W,raw.H,tex,layerStore);
       setTimeout(()=>onRendered({rid:id,buf:buf.buffer,W:raw.W,H:raw.H,kind,fname}),0);
     }
   }
@@ -743,6 +874,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   }
   let fullTimer=null;
   function scheduleRender(){
+    if(typeof refreshPro==='function')refreshPro();
     if(!srcImg)return;
     if(typeof scheduleHist==='function')scheduleHist();
     stage.classList.add('working');
@@ -759,7 +891,8 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     fiber:['fiber','vFiber',0],vig:['vig','vVig',0],texOp:['texOp','vTexOp',0],texScale:['texScale','vTexScale',2],
     mis:['mis','vMis',0],misRot:['misRot','vMisRot',1],
     trap:['trap','vTrap',0],generations:['generations','vGenerations',0],
-    degStreak:['degStreak','vDegStreak',2],degLeak:['degLeak','vDegLeak',2],degRough:['degRough','vDegRough',2]
+    degStreak:['degStreak','vDegStreak',2],degLeak:['degLeak','vDegLeak',2],degRough:['degRough','vDegRough',2],
+    gcr:['gcr','vGcr',2]
   };
   Object.entries(sliders).forEach(([key,[id,vid,dec]])=>{
     const el=$(id),v=$(vid);
@@ -929,6 +1062,9 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     $('skew').value=state.skew;$('vSkew').textContent=(+state.skew).toFixed(1)+'°';
     ['htAngC','htAngM','htAngY','htAngK'].forEach(key=>{if(angleInputs[key]){angleInputs[key].value=state[key];const b=$('va'+key);if(b)b.textContent=state[key];}});
     renderSpotInks();
+    syncSeg('paperProfile','pp',state.paperProfile);
+    $('htAAToggle').classList.toggle('on',state.htAA);
+    if(typeof refreshPro==='function'){_platesSig='';refreshPro();}
   }
 
   // ---------- history (undo/redo) ----------
@@ -979,7 +1115,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     svg+='<rect width="'+W+'" height="'+H+'" fill="'+state.paper+'"/>\n';
     let total=0;
     for(let pi=0;pi<info.length;pi++){
-      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null);
+      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null,layerStore);
       const a=info[pi].ang*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);
       let g='<g fill="'+info[pi].col+'">';
       for(let iv=-N;iv<=N;iv++)for(let iu=-N;iu<=N;iu++){
@@ -1003,6 +1139,103 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     reg(W/2,m*0.7);reg(W/2,H-m*0.7);return s+'</g>\n';}
   $('exportSvg').addEventListener('click',()=>{if(!srcImg)return;const svg=buildSVG();if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
 
+  // ===== Pro module (paper profile, AA, curves, multilayer, histogram, A/B, gallery) =====
+  $('paperProfile').addEventListener('click',e=>{const pp=e.target.dataset.pp;if(!pp)return;state.paperProfile=pp;syncSeg('paperProfile','pp',pp);scheduleRender();});
+  toggle('htAAToggle','htAA');
+  function currentPlates(){
+    if(state.colorMode!=='cmyk')return [{key:'K',label:'Tinta',col:state.ink}];
+    if(state.separation==='spot')return state.spotInks.map((ink,k)=>({key:'s'+k,label:'Spot '+(k+1),col:ink.col}));
+    const cols=[state.colC,state.colM,state.colY,state.colK],lbl=['C','M','Y','K'],out=[];
+    for(let pl=0;pl<4;pl++)if(state.plateOn[pl])out.push({key:lbl[pl],label:lbl[pl],col:cols[pl]});return out;
+  }
+  // --- curves per plate ---
+  let lvKey='K';
+  function buildLvPlate(){const wrap=$('lvPlate');wrap.innerHTML='';const ps=currentPlates();if(!ps.find(p=>p.key===lvKey))lvKey=ps[0]?ps[0].key:'K';
+    ps.forEach(p=>{const b=document.createElement('button');b.textContent=p.label;if(p.key===lvKey)b.classList.add('on');b.addEventListener('click',()=>{lvKey=p.key;buildLvPlate();reflectLv();});wrap.appendChild(b);});}
+  function curLv(){return state.levels[lvKey]||{lo:0,hi:1,g:1};}
+  function setLv(f,v){const lv=Object.assign({lo:0,hi:1,g:1},state.levels[lvKey]);lv[f]=v;state.levels[lvKey]=lv;scheduleRender();}
+  function reflectLv(){const lv=curLv();$('lvLo').value=lv.lo;$('vLvLo').textContent=(+lv.lo).toFixed(2);$('lvHi').value=lv.hi;$('vLvHi').textContent=(+lv.hi).toFixed(2);$('lvG').value=lv.g;$('vLvG').textContent=(+lv.g).toFixed(2);}
+  $('lvLo').addEventListener('input',e=>{const v=parseFloat(e.target.value);setLv('lo',v);$('vLvLo').textContent=v.toFixed(2);});
+  $('lvHi').addEventListener('input',e=>{const v=parseFloat(e.target.value);setLv('hi',v);$('vLvHi').textContent=v.toFixed(2);});
+  $('lvG').addEventListener('input',e=>{const v=parseFloat(e.target.value);setLv('g',v);$('vLvG').textContent=v.toFixed(2);});
+  // --- multilayer list ---
+  let layerTargetKey=null;
+  refreshLayerButtons=function(){const wrap=$('layerList');if(!wrap)return;wrap.innerHTML='';
+    currentPlates().forEach(p=>{const row=document.createElement('div');row.className='layerrow';
+      const lbl=document.createElement('span');lbl.className='pl';lbl.textContent=p.label;
+      const btn=document.createElement('div');btn.className='ly'+(layerStore[p.key]?' has':'');btn.textContent=layerStore[p.key]?'IMG ✓':'subir imagen';
+      btn.addEventListener('click',()=>{layerTargetKey=p.key;$('layerFile').click();});
+      const clr=document.createElement('button');clr.className='clr';clr.textContent='×';clr.addEventListener('click',()=>clearLayer(p.key));
+      row.appendChild(lbl);row.appendChild(btn);row.appendChild(clr);wrap.appendChild(row);});};
+  $('layerFile').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f&&layerTargetKey)loadLayer(layerTargetKey,f);});
+  // --- refresh Pro lists when plate set changes ---
+  var _platesSig='';
+  function refreshPro(){const sig=state.colorMode+'|'+state.separation+'|'+currentPlates().map(p=>p.key).join(',');if(sig!==_platesSig){_platesSig=sig;buildLvPlate();reflectLv();refreshLayerButtons();}}
+  buildLvPlate();reflectLv();refreshLayerButtons();
+  // --- histogram per plate ---
+  $('analyzeBtn').addEventListener('click',()=>{
+    if(!srcImg)return;
+    const raw=rawPrev,W=raw.W,H=raw.H,ps=currentPlates(),hc=$('histCanvas'),g=hc.getContext('2d'),CW=hc.width,CH=hc.height;
+    g.clearRect(0,0,CW,CH);g.fillStyle='#1b1b1b';g.fillRect(0,0,CW,CH);
+    const warn=[];
+    ps.forEach((p,pi)=>{
+      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,layerStore);
+      const bins=new Float32Array(64);let clipHi=0,nn=W*H;
+      for(let i=0;i<nn;i++){const cval=1-buf[i*4]/255;const b=Math.min(63,Math.max(0,Math.floor(cval*64)));bins[b]++;if(cval>0.985)clipHi++;}
+      let mx=1;for(let b=0;b<64;b++)if(bins[b]>mx)mx=bins[b];
+      g.strokeStyle=p.col;g.globalAlpha=0.85;g.beginPath();
+      for(let b=0;b<64;b++){const x=b/63*CW,y=CH-(bins[b]/mx)*CH;if(b===0)g.moveTo(x,y);else g.lineTo(x,y);}
+      g.stroke();g.globalAlpha=1;
+      const cp=clipHi/nn*100;if(cp>8)warn.push(p.label+' '+cp.toFixed(0)+'%');
+    });
+    $('clipWarn').textContent=warn.length?('⚠ saturación: '+warn.join(' · ')):'sin recorte excesivo';
+  });
+  // --- A/B compare ---
+  let stateA=null,stateB=null;
+  $('storeA').addEventListener('click',()=>{stateA=JSON.stringify(stateForSave());flash($('storeA'));});
+  $('storeB').addEventListener('click',()=>{stateB=JSON.stringify(stateForSave());flash($('storeB'));});
+  $('viewAB').addEventListener('click',()=>{
+    if(!srcImg||!stateA||!stateB){alert('Guarda A y B primero.');return;}
+    const raw=rawPrev,W=raw.W,H=raw.H,save=JSON.stringify(stateForSave());
+    function rt(canvas,snap){loadState(JSON.parse(snap));const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,tex,layerStore);canvas.width=W;canvas.height=H;canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);}
+    rt($('cvA'),stateA);rt($('cvB'),stateB);loadState(JSON.parse(save));$('abOverlay').classList.remove('hidden');
+  });
+  $('abClose').addEventListener('click',()=>$('abOverlay').classList.add('hidden'));
+  // --- preset gallery ---
+  $('galleryBtn').addEventListener('click',()=>{
+    if(!srcImg){alert('Carga una imagen primero.');return;}
+    const grid=$('galGrid');grid.innerHTML='';
+    const raw=makeRaw(220),W=raw.W,H=raw.H,save=JSON.stringify(stateForSave());
+    Object.keys(PRESETS).forEach(nm=>{
+      loadState(JSON.parse(save));Object.assign(state,JSON.parse(JSON.stringify(PRESETS[nm])));
+      const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,null,layerStore);
+      const cell=document.createElement('div');cell.className='gal-cell';
+      const cv2=document.createElement('canvas');cv2.width=W;cv2.height=H;cv2.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
+      const nmEl=document.createElement('div');nmEl.className='nm';nmEl.textContent=nm;
+      cell.appendChild(cv2);cell.appendChild(nmEl);
+      cell.addEventListener('click',()=>{applyPreset(PRESETS[nm]);$('galOverlay').classList.add('hidden');});
+      grid.appendChild(cell);
+    });
+    loadState(JSON.parse(save));$('galOverlay').classList.remove('hidden');
+  });
+  $('galClose').addEventListener('click',()=>$('galOverlay').classList.add('hidden'));
+  // --- ZIP (store method) ---
+  function crc32(b){let c,crc=0xFFFFFFFF;for(let i=0;i<b.length;i++){c=(crc^b[i])&0xFF;for(let k=0;k<8;k++)c=c&1?(c>>>1)^0xEDB88320:c>>>1;crc=(crc>>>8)^c;}return (crc^0xFFFFFFFF)>>>0;}
+  function u16(v){return new Uint8Array([v&255,(v>>8)&255]);}
+  function u32(v){return new Uint8Array([v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255]);}
+  function buildZip(files){
+    const enc=new TextEncoder(),chunks=[],central=[];let offset=0;
+    files.forEach(f=>{const nameB=enc.encode(f.name),data=f.bytes,crc=crc32(data);
+      const lh=concatBytes([u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(nameB.length),u16(0),nameB]);
+      chunks.push(lh,data);central.push({nameB,crc,size:data.length,offset});offset+=lh.length+data.length;});
+    const cdStart=offset,cdChunks=[];
+    central.forEach(c=>{const cd=concatBytes([u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(c.crc),u32(c.size),u32(c.size),u16(c.nameB.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(c.offset),c.nameB]);cdChunks.push(cd);offset+=cd.length;});
+    const cdSize=offset-cdStart;
+    const eocd=concatBytes([u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),u32(cdSize),u32(cdStart),u16(0)]);
+    return concatBytes(chunks.concat(cdChunks,[eocd]));
+  }
+  window.__buildZip=buildZip; // used by batch
+
   // ===== advanced exports =====
   let tileCols=2,tileRows=2,textSize=220,textFont='Bebas Neue',vidFrames=36,vidMode='seed';
   $('tileCols').addEventListener('input',e=>tileCols=Math.max(1,parseInt(e.target.value||'1',10)));
@@ -1020,7 +1253,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,freq=Math.max(3,state.htFreq),info=platesInfo();
     const diag=Math.sqrt(W*W+H*H),N=Math.ceil(diag/freq),step=1.3,out=[];
     for(let pi=0;pi<info.length;pi++){
-      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null);
+      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null,layerStore);
       const a=info[pi].ang*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a),polys=[];
       for(let iv=-N;iv<=N;iv++){const v=iv*freq;let cur=null;
         for(let s=-diag;s<=diag;s+=step){const x=s*ca+v*sa,y=-s*sa+v*ca;
@@ -1067,7 +1300,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     if(!srcImg)return;
     const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,info=platesInfo(),jpegs=[];
     for(let pi=0;pi<info.length;pi++){
-      const buf=window.renderCore(buildParams('sep',pi),raw.u8,W,H,null);
+      const buf=window.renderCore(buildParams('sep',pi),raw.u8,W,H,null,layerStore);
       const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
       if(showMarks)drawMarks(g,W,H);
       jpegs.push(b64ToBytes(c.toDataURL('image/jpeg',0.92).split(',')[1]));
@@ -1080,7 +1313,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     if(!srcImg)return;
     const raw=makeRaw(Math.min(3000,FULL_DIM*2)),W=raw.W,H=raw.H;
     const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
-    const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,tex);
+    const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,tex,layerStore);
     const full=document.createElement('canvas');full.width=W;full.height=H;full.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
     const tw=Math.ceil(W/tileCols),th=Math.ceil(H/tileRows);let delay=0;
     for(let r=0;r<tileRows;r++)for(let cc=0;cc<tileCols;cc++){
@@ -1103,19 +1336,29 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---- batch ----
   $('batchBtn').addEventListener('click',()=>$('batchFile').click());
+  let zipBatch=false;
+  $('zipToggle').addEventListener('click',()=>{zipBatch=!zipBatch;$('zipToggle').classList.toggle('on',zipBatch);});
   $('batchFile').addEventListener('change',async e=>{
     const files=[...e.target.files];e.target.value='';
-    for(const f of files){await new Promise(res=>{
+    const tmpl=$('batchName').value||'fk_{name}';
+    const zipFiles=[];let idx=0;
+    for(const f of files){idx++;await new Promise(res=>{
       const url=URL.createObjectURL(f),img=new Image();
       img.onload=()=>{const s=Math.min(1,FULL_DIM/Math.max(img.naturalWidth,img.naturalHeight)),W=Math.round(img.naturalWidth*s),H=Math.round(img.naturalHeight*s);
         off.width=W;off.height=H;offc.drawImage(img,0,0,W,H);const u8=new Uint8ClampedArray(offc.getImageData(0,0,W,H).data);
         const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
-        const buf=window.renderCore(buildParams('normal'),u8,W,H,tex);
+        const buf=window.renderCore(buildParams('normal'),u8,W,H,tex,layerStore);
         const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
         if(showMarks)drawMarks(g,W,H);
-        c.toBlob(b=>{downloadBytes(b,'fk_'+f.name.replace(/\.[^.]+$/,'')+'.png','image/png');setTimeout(()=>{URL.revokeObjectURL(url);res();},450);},'image/png');
+        const base=f.name.replace(/\.[^.]+$/,'');
+        const outName=tmpl.replace(/\{name\}/g,base).replace(/\{n\}/g,String(idx).padStart(2,'0'))+'.png';
+        c.toBlob(async b=>{
+          if(zipBatch){const ab=await b.arrayBuffer();zipFiles.push({name:outName,bytes:new Uint8Array(ab)});URL.revokeObjectURL(url);res();}
+          else{downloadBytes(b,outName,'image/png');setTimeout(()=>{URL.revokeObjectURL(url);res();},450);}
+        },'image/png');
       };img.onerror=()=>res();img.src=url;
     });}
+    if(zipBatch&&zipFiles.length){const zip=window.__buildZip(zipFiles);const zn=tmpl.replace(/\{name\}/g,'lote').replace(/\{n\}/g,'')+'.zip';downloadBytes(new Blob([zip],{type:'application/zip'}),zn,'application/zip');}
     if(srcImg){rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);scheduleRender();}
   });
 
@@ -1136,7 +1379,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     for(let f=0;f<vidFrames;f++){
       const p=buildParams('normal');
       if(vidMode==='seed')p.seed=baseSeed+f*7+1;else p.mis=Math.max(0,baseMis+Math.sin(f/vidFrames*Math.PI*2)*7);
-      const buf=window.renderCore(p,raw.u8,W,H,tex);
+      const buf=window.renderCore(p,raw.u8,W,H,tex,layerStore);
       rg.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
       if(track.requestFrame)track.requestFrame();
       btn.innerHTML=Math.round((f+1)/vidFrames*100)+'%';
