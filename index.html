@@ -93,6 +93,9 @@
   .layerrow .ly{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);font-family:'JetBrains Mono';font-size:9px;letter-spacing:.5px;padding:6px;cursor:pointer;text-align:center}
   .layerrow .ly.has{border-color:var(--gold);color:var(--gold)}
   .layerrow .clr{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--dim);cursor:pointer;height:26px;width:26px}
+  .layerrow .op{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--dim);cursor:pointer;height:26px;padding:0 5px;font-family:'JetBrains Mono';font-size:8px;letter-spacing:.5px}
+  .layerrow .op.on{border-color:var(--gold);color:var(--gold)}
+  .layerrow .thumb{flex:0 0 auto;width:26px;height:26px;object-fit:cover;border:1px solid var(--line);cursor:pointer;display:block}
   .overlay{position:fixed;inset:0;background:rgba(8,8,8,.92);z-index:50;display:flex;flex-direction:column}
   .overlay.hidden{display:none}
   .ov-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--gold)}
@@ -314,6 +317,7 @@
         <div class="ctrl"><label><span data-i18n="lv_lo">Negro (in)</span><span class="val" id="vLvLo">0.00</span></label><input type="range" id="lvLo" min="0" max="0.9" step="0.02" value="0"></div>
         <div class="ctrl"><label><span data-i18n="lv_hi">Blanco (in)</span><span class="val" id="vLvHi">1.00</span></label><input type="range" id="lvHi" min="0.1" max="1" step="0.02" value="1"></div>
         <div class="ctrl"><label><span data-i18n="lv_g">Gamma</span><span class="val" id="vLvG">1.00</span></label><input type="range" id="lvG" min="0.3" max="3" step="0.05" value="1"></div>
+        <button class="btn ghost sm" id="lvReset" data-i18n="lv_reset">RESET CURVA</button>
 
         <span class="cap" data-i18n="layers" style="margin-top:14px">CAPAS POR PLANCHA (MULTICAPA)</span>
         <div id="layerList"></div>
@@ -324,7 +328,7 @@
         <button class="btn ghost sm" id="analyzeBtn" data-i18n="analyze" style="margin-top:6px">ANALIZAR PLANCHAS</button>
 
         <span class="cap" data-i18n="ab" style="margin-top:14px">COMPARADOR A/B</span>
-        <div class="row2"><button class="btn ghost sm" id="storeA">GUARDAR A</button><button class="btn ghost sm" id="storeB">GUARDAR B</button></div>
+        <div class="row2"><button class="btn ghost sm" id="storeA" data-i18n="store_a">GUARDAR A</button><button class="btn ghost sm" id="storeB" data-i18n="store_b">GUARDAR B</button></div>
         <button class="btn ghost sm" id="viewAB" data-i18n="view_ab" style="margin-top:8px">VER A | B</button>
 
         <span class="cap" data-i18n="gallery" style="margin-top:14px">GALERÍA DE PRESETS</span>
@@ -631,15 +635,30 @@ function renderCore(p, raw, W, H, tex, layers){
   const inv=p.invert, c=p.contrast;
   const isMono=p.colorMode!=='cmyk';
   const misRotRad=(p.misRot||0)*Math.PI/180;
-  function layerCov(layer){
-    const cov=new Float32Array(n), lum=layer.lum, lw=layer.w, lh=layer.h, sx=lw/W, sy=lh/H;
+  function layerCov(L){
+    const cov=new Float32Array(n), lum=L.lum, lw=L.w, lh=L.h, o=L.opts||{};
+    let px,py,ox,oy;
+    if(o.fit==='cover'||o.fit==='contain'){
+      const s=(o.fit==='cover'?Math.min:Math.max)(lw/W,lh/H);
+      px=s;py=s;ox=(W-lw/s)/2;oy=(H-lh/s)/2;
+    }else{px=lw/W;py=lh/H;ox=0;oy=0;}
+    const bounded=o.fit==='contain';
     for(let y=0,i=0;y<H;y++)for(let x=0;x<W;x++,i++){
-      let fx=x*sx, fy=y*sy; if(fx>lw-1)fx=lw-1; if(fy>lh-1)fy=lh-1;
+      let fx=(x-ox)*px, fy=(y-oy)*py;
+      if(bounded&&(fx<0||fy<0||fx>lw-1||fy>lh-1)){cov[i]=0;continue;}
+      if(fx<0)fx=0;else if(fx>lw-1)fx=lw-1; if(fy<0)fy=0;else if(fy>lh-1)fy=lh-1;
       const xi=fx|0,yi=fy|0,tx=fx-xi,ty=fy-yi,xi1=xi<lw-1?xi+1:xi,yi1=yi<lh-1?yi+1:yi,r0=yi*lw,r1=yi1*lw;
       const a=lum[r0+xi]*(1-tx)+lum[r0+xi1]*tx,b=lum[r1+xi]*(1-tx)+lum[r1+xi1]*tx;let l=a*(1-ty)+b*ty;
-      if(inv)l=1-l;l=clamp01((l-0.5)*c+0.5);cov[i]=1-l;
+      if(inv)l=1-l; if(o.inv)l=1-l;
+      l=clamp01((l-0.5)*c+0.5);cov[i]=1-l;
     }
     return cov;
+  }
+  function applyLayer(cov,key){
+    const L=layers&&layers[key];if(!L)return cov;
+    const lc=layerCov(L);
+    if(L.opts&&L.opts.mode==='mask'){for(let i=0;i<n;i++)lc[i]*=cov[i];}
+    return lc;
   }
   function applyLevels(cov,lv){
     if(!lv)return cov;const lo=lv.lo||0,hi=(lv.hi==null?1:lv.hi),g=lv.g||1;
@@ -651,17 +670,18 @@ function renderCore(p, raw, W, H, tex, layers){
   // ---- build plate list: {cov, col, ang, off, rot, key} ----
   const plates=[];
   if(isMono){
-    let cov;
-    if(layers&&layers.K)cov=layerCov(layers.K);
-    else{const gray=new Float32Array(n);for(let i=0,q=0;i<n;i++,q+=4){let l=0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2];l=(l-128)*c+128;if(inv)l=255-l;gray[i]=l<0?0:l>255?255:l;}cov=new Float32Array(n);for(let i=0;i<n;i++)cov[i]=1-gray[i]/255;}
+    const gray=new Float32Array(n);for(let i=0,q=0;i<n;i++,q+=4){let l=0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2];l=(l-128)*c+128;if(inv)l=255-l;gray[i]=l<0?0:l>255?255:l;}
+    let cov=new Float32Array(n);for(let i=0;i<n;i++)cov[i]=1-gray[i]/255;
+    cov=applyLayer(cov,'K');
     plates.push({cov,col:p.ink,ang:p.htAngK,off:[0,0],rot:0,key:'K'});
   } else if(p.separation==='spot'){
     const lum=new Float32Array(n);
     for(let i=0,q=0;i<n;i++,q+=4){let l=(0.299*raw[q]+0.587*raw[q+1]+0.114*raw[q+2])/255;l=clamp01((l-0.5)*c+0.5);if(inv)l=1-l;lum[i]=1-l;}
     (p.spotInks||[]).forEach((ink,k)=>{
-      const key='s'+k;let cov;
-      if(layers&&layers[key])cov=layerCov(layers[key]);
-      else{const cen=ink.center,wid=Math.max(0.05,ink.width),gam=ink.gamma||1;cov=new Float32Array(n);for(let i=0;i<n;i++){let d=Math.abs(lum[i]-cen)/wid;let v=clamp01(1-d);cov[i]=Math.pow(v,1/gam);}}
+      const key='s'+k;
+      const cen=ink.center,wid=Math.max(0.05,ink.width),gam=ink.gamma||1;let cov=new Float32Array(n);
+      for(let i=0;i<n;i++){let d=Math.abs(lum[i]-cen)/wid;let v=clamp01(1-d);cov[i]=Math.pow(v,1/gam);}
+      cov=applyLayer(cov,key);
       plates.push({cov,col:ink.col,ang:(ink.ang!=null?ink.ang:[15,75,0,45][k%4]),off:[0,0],rot:0,key});
     });
   } else {
@@ -677,7 +697,7 @@ function renderCore(p, raw, W, H, tex, layers){
     const mis=p.mis;const offs=[[-mis,-mis*0.45],[mis*0.85,-mis*0.55],[mis*0.25,mis*0.95],[0,0]];
     const rots=[-misRotRad,0,misRotRad,0];
     const keys=['C','M','Y','K'],cols=[p.colC,p.colM,p.colY,p.colK],angs=[p.htAngC,p.htAngM,p.htAngY,p.htAngK],covs=[covC,covM,covY,covK];
-    for(let pl=0;pl<4;pl++){if(p.plateOn[pl]){let cov=covs[pl];if(layers&&layers[keys[pl]])cov=layerCov(layers[keys[pl]]);plates.push({cov,col:cols[pl],ang:angs[pl],off:offs[pl],rot:rots[pl],key:keys[pl]});}}
+    for(let pl=0;pl<4;pl++){if(p.plateOn[pl]){const cov=applyLayer(covs[pl],keys[pl]);plates.push({cov,col:cols[pl],ang:angs[pl],off:offs[pl],rot:rots[pl],key:keys[pl]});}}
   }
 
   // ---- process each plate → ink field ----
@@ -729,7 +749,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   self.onmessage=function(e){
     const d=e.data;
     if(d.t==='tex'){store.tex[d.id]={gray:new Float32Array(d.gray),w:d.w,h:d.h};return;}
-    if(d.t==='layer'){if(d.lum)store.layers[d.key]={lum:new Float32Array(d.lum),w:d.w,h:d.h};else delete store.layers[d.key];return;}
+    if(d.t==='layer'){if(d.lum)store.layers[d.key]={lum:new Float32Array(d.lum),w:d.w,h:d.h,opts:d.opts||{}};else delete store.layers[d.key];return;}
     if(d.t==='render'){
       const raw=new Uint8ClampedArray(d.raw);
       const tex=d.texId!=null?store.tex[d.texId]:null;
@@ -750,13 +770,13 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- i18n ----------
   const T={
-    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES",g_pro:"Pro / Imprenta",curves:"CURVAS POR PLANCHA",lv_lo:"Negro (in)",lv_hi:"Blanco (in)",lv_g:"Gamma",layers:"CAPAS POR PLANCHA (MULTICAPA)",histo:"HISTOGRAMA POR PLANCHA",analyze:"ANALIZAR PLANCHAS",ab:"COMPARADOR A/B",view_ab:"VER A | B",gallery:"GALERÍA DE PRESETS",open_gallery:"ABRIR GALERÍA",paper_profile:"Perfil de papel",pp_offset:"Offset",pp_coated:"Couché",pp_uncoated:"Offset+",pp_news:"Prensa",pp_porous:"Poroso",htaa:"Antialias de trama (2×)",gcr:"GCR / UCR (negro)",zip:"Empaquetar en ZIP"},
-    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU",g_pro:"Pro / Inprenta",curves:"PLAKA BAKOITZAREN KURBAK",lv_lo:"Beltza (sar)",lv_hi:"Zuria (sar)",lv_g:"Gamma",layers:"PLAKA BAKOITZEKO GERUZAK",histo:"PLAKA BAKOITZAREN HISTOGRAMA",analyze:"PLAKAK AZTERTU",ab:"A/B KONPARATZAILEA",view_ab:"IKUSI A | B",gallery:"AURREZARPEN GALERIA",open_gallery:"GALERIA IREKI",paper_profile:"Paper profila",pp_offset:"Offset",pp_coated:"Kutxetua",pp_uncoated:"Offset+",pp_news:"Prentsa",pp_porous:"Porotsua",htaa:"Tramaren antialias (2×)",gcr:"GCR / UCR (beltza)",zip:"ZIP-en bildu"},
-    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES",g_pro:"Pro / Print",curves:"PER-PLATE CURVES",lv_lo:"Black (in)",lv_hi:"White (in)",lv_g:"Gamma",layers:"PER-PLATE LAYERS (MULTILAYER)",histo:"PER-PLATE HISTOGRAM",analyze:"ANALYZE PLATES",ab:"A/B COMPARE",view_ab:"VIEW A | B",gallery:"PRESET GALLERY",open_gallery:"OPEN GALLERY",paper_profile:"Paper profile",pp_offset:"Offset",pp_coated:"Coated",pp_uncoated:"Offset+",pp_news:"News",pp_porous:"Porous",htaa:"Screen antialias (2×)",gcr:"GCR / UCR (black)",zip:"Pack as ZIP"}
+    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES",g_pro:"Pro / Imprenta",curves:"CURVAS POR PLANCHA",lv_lo:"Negro (in)",lv_hi:"Blanco (in)",lv_g:"Gamma",layers:"CAPAS POR PLANCHA (MULTICAPA)",histo:"HISTOGRAMA POR PLANCHA",analyze:"ANALIZAR PLANCHAS",ab:"COMPARADOR A/B",view_ab:"VER A | B",gallery:"GALERÍA DE PRESETS",open_gallery:"ABRIR GALERÍA",paper_profile:"Perfil de papel",pp_offset:"Offset",pp_coated:"Couché",pp_uncoated:"Offset+",pp_news:"Prensa",pp_porous:"Poroso",htaa:"Antialias de trama (2×)",gcr:"GCR / UCR (negro)",zip:"Empaquetar en ZIP",lv_reset:"RESET CURVA",store_a:"GUARDAR A",store_b:"GUARDAR B",pl_ink:"Tinta",ly_has:"IMG ✓",ly_upload:"subir imagen",clip_warn:"⚠ saturación:",clip_ok:"sin recorte excesivo",need_ab:"Guarda A y B primero.",need_img:"Carga una imagen primero.",fit_stretch:"ESTIRAR",fit_cover:"CUBRIR",fit_contain:"ENCAJAR"},
+    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU",g_pro:"Pro / Inprenta",curves:"PLAKA BAKOITZAREN KURBAK",lv_lo:"Beltza (sar)",lv_hi:"Zuria (sar)",lv_g:"Gamma",layers:"PLAKA BAKOITZEKO GERUZAK",histo:"PLAKA BAKOITZAREN HISTOGRAMA",analyze:"PLAKAK AZTERTU",ab:"A/B KONPARATZAILEA",view_ab:"IKUSI A | B",gallery:"AURREZARPEN GALERIA",open_gallery:"GALERIA IREKI",paper_profile:"Paper profila",pp_offset:"Offset",pp_coated:"Kutxetua",pp_uncoated:"Offset+",pp_news:"Prentsa",pp_porous:"Porotsua",htaa:"Tramaren antialias (2×)",gcr:"GCR / UCR (beltza)",zip:"ZIP-en bildu",lv_reset:"KURBA BERREZARRI",store_a:"A GORDE",store_b:"B GORDE",pl_ink:"Tinta",ly_has:"IRUDIA ✓",ly_upload:"irudia igo",clip_warn:"⚠ asetasuna:",clip_ok:"gehiegizko mozketarik ez",need_ab:"Gorde A eta B lehenik.",need_img:"Kargatu irudi bat lehenik.",fit_stretch:"LUZATU",fit_cover:"BETE",fit_contain:"DOITU"},
+    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES",g_pro:"Pro / Print",curves:"PER-PLATE CURVES",lv_lo:"Black (in)",lv_hi:"White (in)",lv_g:"Gamma",layers:"PER-PLATE LAYERS (MULTILAYER)",histo:"PER-PLATE HISTOGRAM",analyze:"ANALYZE PLATES",ab:"A/B COMPARE",view_ab:"VIEW A | B",gallery:"PRESET GALLERY",open_gallery:"OPEN GALLERY",paper_profile:"Paper profile",pp_offset:"Offset",pp_coated:"Coated",pp_uncoated:"Offset+",pp_news:"News",pp_porous:"Porous",htaa:"Screen antialias (2×)",gcr:"GCR / UCR (black)",zip:"Pack as ZIP",lv_reset:"RESET CURVE",store_a:"STORE A",store_b:"STORE B",pl_ink:"Ink",ly_has:"IMG ✓",ly_upload:"upload image",clip_warn:"⚠ clipping:",clip_ok:"no excessive clipping",need_ab:"Store A and B first.",need_img:"Load an image first.",fit_stretch:"STRETCH",fit_cover:"COVER",fit_contain:"FIT"}
   };
   let lang='es';
   function applyLang(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[lang][k]!=null)el.textContent=T[lang][k];});document.documentElement.lang=lang;}
-  $('lang').addEventListener('click',e=>{const l=e.target.dataset.l;if(!l)return;lang=l;document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));applyLang();});
+  $('lang').addEventListener('click',e=>{const l=e.target.dataset.l;if(!l)return;lang=l;document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));applyLang();if(typeof refreshPro==='function'){_platesSig='';refreshPro();}});
 
   // ---------- state ----------
   const RISO=[['#252525','Black'],['#ff48b0','Fluo Pink'],['#0078bf','Blue'],['#00a95c','Green'],['#ff6f00','Orange'],['#765aa6','Purple'],['#e2452b','Vermilion'],['#f2ead9','Cream']];
@@ -800,21 +820,32 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- per-plate layers (multilayer) ----------
   const layerStore={}, layerDirty={};
+  function lumFromCanvas(c){
+    const w=c.width,h=c.height,d=c.getContext('2d').getImageData(0,0,w,h).data;
+    const lum=new Float32Array(w*h);for(let i=0,p=0;i<lum.length;i++,p+=4)lum[i]=(0.299*d[p]+0.587*d[p+1]+0.114*d[p+2])/255;
+    return {lum,w,h};
+  }
+  function setLayerFromImage(key,img,opts,dataURL){
+    const cap=1100,s=Math.min(1,cap/Math.max(img.width,img.height));
+    const w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+    const L=lumFromCanvas(c);
+    layerStore[key]={lum:L.lum,w,h,opts:opts||{},dataURL:dataURL||c.toDataURL('image/jpeg',0.9)};
+    layerDirty[key]=true;refreshLayerButtons();scheduleRender();
+  }
   function loadLayer(key,file){
     const url=URL.createObjectURL(file),img=new Image();
-    img.onload=()=>{const cap=1100,s=Math.min(1,cap/Math.max(img.width,img.height));const w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
-      const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.drawImage(img,0,0,w,h);const d=g.getImageData(0,0,w,h).data;
-      const lum=new Float32Array(w*h);for(let i=0,p=0;i<lum.length;i++,p+=4)lum[i]=(0.299*d[p]+0.587*d[p+1]+0.114*d[p+2])/255;
-      layerStore[key]={lum,w,h};layerDirty[key]=true;URL.revokeObjectURL(url);refreshLayerButtons();scheduleRender();};
+    img.onload=()=>{const prev=layerStore[key];setLayerFromImage(key,img,prev&&prev.opts);URL.revokeObjectURL(url);};
     img.src=url;
   }
   function clearLayer(key){delete layerStore[key];layerDirty[key]=true;refreshLayerButtons();scheduleRender();}
+  function setLayerOpt(key,field,val){const L=layerStore[key];if(!L)return;L.opts=L.opts||{};L.opts[field]=val;layerDirty[key]=true;refreshLayerButtons();scheduleRender();}
   function ensureLayersSent(){
     if(!useWorker)return;
     Object.keys(layerDirty).forEach(key=>{
       if(!layerDirty[key])return;layerDirty[key]=false;
       const L=layerStore[key];
-      if(L){const copy=L.lum.slice();worker.postMessage({t:'layer',key,lum:copy.buffer,w:L.w,h:L.h},[copy.buffer]);}
+      if(L){const copy=L.lum.slice();worker.postMessage({t:'layer',key,lum:copy.buffer,w:L.w,h:L.h,opts:L.opts||{}},[copy.buffer]);}
       else worker.postMessage({t:'layer',key,lum:null});
     });
   }
@@ -859,8 +890,23 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
       setTimeout(()=>onRendered({rid:id,buf:buf.buffer,W:raw.W,H:raw.H,kind,fname}),0);
     }
   }
+  function renderJob(params,rawObj){
+    return new Promise(resolve=>{
+      const id=++rid; jobs[id]={kind:'job',resolve};
+      if(useWorker){
+        ensureTexSent();ensureLayersSent();
+        const copy=rawObj.u8.slice();
+        worker.postMessage({t:'render',rid:id,params,raw:copy.buffer,W:rawObj.W,H:rawObj.H,texId:(params.mode==='normal'?state.texId:null),kind:'job'},[copy.buffer]);
+      }else{
+        const tex=(params.mode==='normal'&&state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
+        const buf=window.renderCore(params,rawObj.u8,rawObj.W,rawObj.H,tex,layerStore);
+        setTimeout(()=>resolve(buf),0);
+      }
+    });
+  }
   function onRendered(d){
     const job=jobs[d.rid]; delete jobs[d.rid];
+    if(job&&job.kind==='job'){job.resolve(new Uint8ClampedArray(d.buf));return;}
     const img=new ImageData(new Uint8ClampedArray(d.buf),d.W,d.H);
     if(!job||job.kind==='preview'||job.kind==='full'){
       cv.width=d.W;cv.height=d.H;ctx.putImageData(img,0,0);
@@ -1083,9 +1129,19 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   function decodeState(s){try{return JSON.parse(decodeURIComponent(escape(atob(s))));}catch(e){return null;}}
   function flash(btn){const t=btn.innerHTML;btn.innerHTML='✓';setTimeout(()=>btn.innerHTML=t,800);}
   $('shareBtn').addEventListener('click',()=>{history.replaceState(null,'','#s='+encodeState());if(navigator.clipboard)navigator.clipboard.writeText(location.href);flash($('shareBtn'));});
-  $('expJson').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(stateForSave(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
+  $('expJson').addEventListener('click',()=>{
+    const o=stateForSave();
+    const lk=Object.keys(layerStore);
+    if(lk.length){o._layers={};lk.forEach(k=>{const L=layerStore[k];o._layers[k]={png:L.dataURL,opts:L.opts||{}};});}
+    const blob=new Blob([JSON.stringify(o,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
   $('impJson').addEventListener('click',()=>$('jsonFile').click());
-  $('jsonFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{loadState(JSON.parse(r.result));reflectAll();histPush();scheduleRender();}catch(err){alert('JSON inválido');}};r.readAsText(f);});
+  $('jsonFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{
+    const o=JSON.parse(r.result);
+    loadState(o);
+    Object.keys(layerStore).forEach(k=>clearLayer(k));
+    if(o._layers)Object.entries(o._layers).forEach(([k,ld])=>{if(!ld||!ld.png)return;const img=new Image();img.onload=()=>setLayerFromImage(k,img,ld.opts||{},ld.png);img.src=ld.png;});
+    reflectAll();histPush();scheduleRender();
+  }catch(err){alert('JSON inválido');}};r.readAsText(f);});
 
   // ---------- registration / crop marks ----------
   let showMarks=false;
@@ -1107,7 +1163,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     const cols=[state.colC,state.colM,state.colY,state.colK],angs=[state.htAngC,state.htAngM,state.htAngY,state.htAngK],list=[];
     for(let pl=0;pl<4;pl++)if(state.plateOn[pl])list.push({col:cols[pl],ang:angs[pl]});return list;
   }
-  function buildSVG(){
+  async function buildSVG(){
     if(state.screenType!=='am'){alert('El SVG vectorial requiere trama tipo Punto (AM). Cambia el tipo de trama a Punto.');return null;}
     const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,freq=state.htFreq,shape=state.dotShape,info=platesInfo();
     const diag=Math.sqrt(W*W+H*H),N=Math.ceil(diag/freq);
@@ -1115,7 +1171,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     svg+='<rect width="'+W+'" height="'+H+'" fill="'+state.paper+'"/>\n';
     let total=0;
     for(let pi=0;pi<info.length;pi++){
-      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null,layerStore);
+      const buf=await renderJob(buildParams('covcont',pi),raw);
       const a=info[pi].ang*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);
       let g='<g fill="'+info[pi].col+'">';
       for(let iv=-N;iv<=N;iv++)for(let iu=-N;iu<=N;iu++){
@@ -1137,13 +1193,13 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     [[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(c=>{const x=c[0],y=c[1],sx=c[2],sy=c[3];s+='<path d="M'+(x+sx*m*0.2)+' '+y+' L'+(x+sx*(m*0.2+L))+' '+y+' M'+x+' '+(y+sy*m*0.2)+' L'+x+' '+(y+sy*(m*0.2+L))+'"/>';});
     function reg(cx,cy){const r=m*0.42;s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'"/><path d="M'+(cx-r*1.6)+' '+cy+' L'+(cx+r*1.6)+' '+cy+' M'+cx+' '+(cy-r*1.6)+' L'+cx+' '+(cy+r*1.6)+'"/>';}
     reg(W/2,m*0.7);reg(W/2,H-m*0.7);return s+'</g>\n';}
-  $('exportSvg').addEventListener('click',()=>{if(!srcImg)return;const svg=buildSVG();if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
+  $('exportSvg').addEventListener('click',async ()=>{if(!srcImg)return;const svg=await buildSVG();if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
 
   // ===== Pro module (paper profile, AA, curves, multilayer, histogram, A/B, gallery) =====
   $('paperProfile').addEventListener('click',e=>{const pp=e.target.dataset.pp;if(!pp)return;state.paperProfile=pp;syncSeg('paperProfile','pp',pp);scheduleRender();});
   toggle('htAAToggle','htAA');
   function currentPlates(){
-    if(state.colorMode!=='cmyk')return [{key:'K',label:'Tinta',col:state.ink}];
+    if(state.colorMode!=='cmyk')return [{key:'K',label:T[lang].pl_ink||'Tinta',col:state.ink}];
     if(state.separation==='spot')return state.spotInks.map((ink,k)=>({key:'s'+k,label:'Spot '+(k+1),col:ink.col}));
     const cols=[state.colC,state.colM,state.colY,state.colK],lbl=['C','M','Y','K'],out=[];
     for(let pl=0;pl<4;pl++)if(state.plateOn[pl])out.push({key:lbl[pl],label:lbl[pl],col:cols[pl]});return out;
@@ -1158,15 +1214,28 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   $('lvLo').addEventListener('input',e=>{const v=parseFloat(e.target.value);setLv('lo',v);$('vLvLo').textContent=v.toFixed(2);});
   $('lvHi').addEventListener('input',e=>{const v=parseFloat(e.target.value);setLv('hi',v);$('vLvHi').textContent=v.toFixed(2);});
   $('lvG').addEventListener('input',e=>{const v=parseFloat(e.target.value);setLv('g',v);$('vLvG').textContent=v.toFixed(2);});
+  $('lvReset').addEventListener('click',()=>{delete state.levels[lvKey];reflectLv();scheduleRender();});
   // --- multilayer list ---
   let layerTargetKey=null;
   refreshLayerButtons=function(){const wrap=$('layerList');if(!wrap)return;wrap.innerHTML='';
-    currentPlates().forEach(p=>{const row=document.createElement('div');row.className='layerrow';
-      const lbl=document.createElement('span');lbl.className='pl';lbl.textContent=p.label;
-      const btn=document.createElement('div');btn.className='ly'+(layerStore[p.key]?' has':'');btn.textContent=layerStore[p.key]?'IMG ✓':'subir imagen';
-      btn.addEventListener('click',()=>{layerTargetKey=p.key;$('layerFile').click();});
-      const clr=document.createElement('button');clr.className='clr';clr.textContent='×';clr.addEventListener('click',()=>clearLayer(p.key));
-      row.appendChild(lbl);row.appendChild(btn);row.appendChild(clr);wrap.appendChild(row);});};
+    const FITS=['stretch','cover','contain'];
+    const fitLbl=f=>T[lang]['fit_'+(f||'stretch')]||f;
+    currentPlates().forEach(p=>{const L=layerStore[p.key],o=(L&&L.opts)||{};
+      const row=document.createElement('div');row.className='layerrow';
+      const lbl=document.createElement('span');lbl.className='pl';lbl.textContent=p.label;row.appendChild(lbl);
+      if(L&&L.dataURL){const im=document.createElement('img');im.className='thumb';im.src=L.dataURL;im.addEventListener('click',()=>{layerTargetKey=p.key;$('layerFile').click();});row.appendChild(im);}
+      const btn=document.createElement('div');btn.className='ly'+(L?' has':'');btn.textContent=L?(T[lang].ly_has||'IMG ✓'):(T[lang].ly_upload||'subir imagen');
+      btn.addEventListener('click',()=>{layerTargetKey=p.key;$('layerFile').click();});row.appendChild(btn);
+      if(L){
+        const bi=document.createElement('button');bi.className='op'+(o.inv?' on':'');bi.textContent='INV';bi.title='Invertir capa';
+        bi.addEventListener('click',()=>setLayerOpt(p.key,'inv',!o.inv));row.appendChild(bi);
+        const bf=document.createElement('button');bf.className='op';bf.textContent=fitLbl(o.fit);bf.title='Ajuste: estirar / cubrir / encajar';
+        bf.addEventListener('click',()=>setLayerOpt(p.key,'fit',FITS[(FITS.indexOf(o.fit||'stretch')+1)%3]));row.appendChild(bf);
+        const bm=document.createElement('button');bm.className='op'+(o.mode==='mask'?' on':'');bm.textContent='MASK';bm.title='Multiplicar sobre la separación algorítmica';
+        bm.addEventListener('click',()=>setLayerOpt(p.key,'mode',o.mode==='mask'?'cov':'mask'));row.appendChild(bm);
+      }
+      const clr=document.createElement('button');clr.className='clr';clr.textContent='×';clr.addEventListener('click',()=>clearLayer(p.key));row.appendChild(clr);
+      wrap.appendChild(row);});};
   $('layerFile').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f&&layerTargetKey)loadLayer(layerTargetKey,f);});
   // --- refresh Pro lists when plate set changes ---
   var _platesSig='';
@@ -1179,7 +1248,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     g.clearRect(0,0,CW,CH);g.fillStyle='#1b1b1b';g.fillRect(0,0,CW,CH);
     const warn=[];
     ps.forEach((p,pi)=>{
-      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,layerStore);
+      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null,layerStore);
       const bins=new Float32Array(64);let clipHi=0,nn=W*H;
       for(let i=0;i<nn;i++){const cval=1-buf[i*4]/255;const b=Math.min(63,Math.max(0,Math.floor(cval*64)));bins[b]++;if(cval>0.985)clipHi++;}
       let mx=1;for(let b=0;b<64;b++)if(bins[b]>mx)mx=bins[b];
@@ -1188,14 +1257,14 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
       g.stroke();g.globalAlpha=1;
       const cp=clipHi/nn*100;if(cp>8)warn.push(p.label+' '+cp.toFixed(0)+'%');
     });
-    $('clipWarn').textContent=warn.length?('⚠ saturación: '+warn.join(' · ')):'sin recorte excesivo';
+    $('clipWarn').textContent=warn.length?((T[lang].clip_warn||'⚠ saturación:')+' '+warn.join(' · ')):(T[lang].clip_ok||'sin recorte excesivo');
   });
   // --- A/B compare ---
   let stateA=null,stateB=null;
   $('storeA').addEventListener('click',()=>{stateA=JSON.stringify(stateForSave());flash($('storeA'));});
   $('storeB').addEventListener('click',()=>{stateB=JSON.stringify(stateForSave());flash($('storeB'));});
   $('viewAB').addEventListener('click',()=>{
-    if(!srcImg||!stateA||!stateB){alert('Guarda A y B primero.');return;}
+    if(!srcImg||!stateA||!stateB){alert(T[lang].need_ab||'Guarda A y B primero.');return;}
     const raw=rawPrev,W=raw.W,H=raw.H,save=JSON.stringify(stateForSave());
     function rt(canvas,snap){loadState(JSON.parse(snap));const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,tex,layerStore);canvas.width=W;canvas.height=H;canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);}
     rt($('cvA'),stateA);rt($('cvB'),stateB);loadState(JSON.parse(save));$('abOverlay').classList.remove('hidden');
@@ -1203,7 +1272,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   $('abClose').addEventListener('click',()=>$('abOverlay').classList.add('hidden'));
   // --- preset gallery ---
   $('galleryBtn').addEventListener('click',()=>{
-    if(!srcImg){alert('Carga una imagen primero.');return;}
+    if(!srcImg){alert(T[lang].need_img||'Carga una imagen primero.');return;}
     const grid=$('galGrid');grid.innerHTML='';
     const raw=makeRaw(220),W=raw.W,H=raw.H,save=JSON.stringify(stateForSave());
     Object.keys(PRESETS).forEach(nm=>{
@@ -1219,8 +1288,10 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     loadState(JSON.parse(save));$('galOverlay').classList.remove('hidden');
   });
   $('galClose').addEventListener('click',()=>$('galOverlay').classList.add('hidden'));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('abOverlay').classList.add('hidden');$('galOverlay').classList.add('hidden');}});
   // --- ZIP (store method) ---
-  function crc32(b){let c,crc=0xFFFFFFFF;for(let i=0;i<b.length;i++){c=(crc^b[i])&0xFF;for(let k=0;k<8;k++)c=c&1?(c>>>1)^0xEDB88320:c>>>1;crc=(crc>>>8)^c;}return (crc^0xFFFFFFFF)>>>0;}
+  const CRC_T=(()=>{const t=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let k=0;k<8;k++)c=c&1?(c>>>1)^0xEDB88320:c>>>1;t[i]=c>>>0;}return t;})();
+  function crc32(b){let crc=0xFFFFFFFF;for(let i=0;i<b.length;i++)crc=(crc>>>8)^CRC_T[(crc^b[i])&0xFF];return (crc^0xFFFFFFFF)>>>0;}
   function u16(v){return new Uint8Array([v&255,(v>>8)&255]);}
   function u32(v){return new Uint8Array([v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255]);}
   function buildZip(files){
@@ -1249,11 +1320,11 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   function downloadText(txt,name,mime){downloadBytes(new TextEncoder().encode(txt),name,mime||'text/plain');}
 
   // ---- HPGL / DXF (line-screen pen geometry) ----
-  function buildLineGeometry(){
+  async function buildLineGeometry(){
     const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,freq=Math.max(3,state.htFreq),info=platesInfo();
     const diag=Math.sqrt(W*W+H*H),N=Math.ceil(diag/freq),step=1.3,out=[];
     for(let pi=0;pi<info.length;pi++){
-      const buf=window.renderCore(buildParams('covcont',pi),raw.u8,W,H,null,layerStore);
+      const buf=await renderJob(buildParams('covcont',pi),raw);
       const a=info[pi].ang*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a),polys=[];
       for(let iv=-N;iv<=N;iv++){const v=iv*freq;let cur=null;
         for(let s=-diag;s<=diag;s+=step){const x=s*ca+v*sa,y=-s*sa+v*ca;
@@ -1269,8 +1340,8 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   }
   function toHPGL(geo){let s='IN;SP1;';geo.plates.forEach((pl,i)=>{s+='SP'+(i+1)+';';pl.polys.forEach(poly=>{s+='PU'+poly[0][0]+','+(geo.H-poly[0][1])+';PD'+poly.map(p=>p[0]+','+(geo.H-p[1])).join(',')+';';});});return s+'PU;SP0;';}
   function toDXF(geo){let s='0\nSECTION\n2\nENTITIES\n';geo.plates.forEach((pl,i)=>{const layer='PLATE'+(i+1);pl.polys.forEach(poly=>{for(let k=0;k<poly.length-1;k++){const A=poly[k],B=poly[k+1];s+='0\nLINE\n8\n'+layer+'\n10\n'+A[0]+'\n20\n'+(geo.H-A[1])+'\n11\n'+B[0]+'\n21\n'+(geo.H-B[1])+'\n';}});});return s+'0\nENDSEC\n0\nEOF\n';}
-  $('exportHpgl').addEventListener('click',()=>{if(!srcImg)return;const g=buildLineGeometry();downloadText(toHPGL(g),'fotokopia_'+Date.now()+'.hpgl','application/vnd.hp-hpgl');});
-  $('exportDxf').addEventListener('click',()=>{if(!srcImg)return;const g=buildLineGeometry();downloadText(toDXF(g),'fotokopia_'+Date.now()+'.dxf','application/dxf');});
+  $('exportHpgl').addEventListener('click',async ()=>{if(!srcImg)return;const g=await buildLineGeometry();downloadText(toHPGL(g),'fotokopia_'+Date.now()+'.hpgl','application/vnd.hp-hpgl');});
+  $('exportDxf').addEventListener('click',async ()=>{if(!srcImg)return;const g=await buildLineGeometry();downloadText(toDXF(g),'fotokopia_'+Date.now()+'.dxf','application/dxf');});
 
   // ---- PDF multipage separations (hand-rolled, JPEG/DCTDecode) ----
   function concatBytes(chunks){let len=0;chunks.forEach(c=>len+=c.length);const out=new Uint8Array(len);let o=0;chunks.forEach(c=>{out.set(c,o);o+=c.length;});return out;}
@@ -1296,11 +1367,11 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     push(xref);push('trailer\n<< /Size '+(total+1)+' /Root 1 0 R >>\nstartxref\n'+xrefStart+'\n%%EOF');
     return concatBytes(chunks);
   }
-  $('exportPdf').addEventListener('click',()=>{
+  $('exportPdf').addEventListener('click',async ()=>{
     if(!srcImg)return;
     const raw=makeRaw(FULL_DIM),W=raw.W,H=raw.H,info=platesInfo(),jpegs=[];
     for(let pi=0;pi<info.length;pi++){
-      const buf=window.renderCore(buildParams('sep',pi),raw.u8,W,H,null,layerStore);
+      const buf=await renderJob(buildParams('sep',pi),raw);
       const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
       if(showMarks)drawMarks(g,W,H);
       jpegs.push(b64ToBytes(c.toDataURL('image/jpeg',0.92).split(',')[1]));
@@ -1309,11 +1380,10 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   });
 
   // ---- tiling ----
-  $('exportTiles').addEventListener('click',()=>{
+  $('exportTiles').addEventListener('click',async ()=>{
     if(!srcImg)return;
     const raw=makeRaw(Math.min(3000,FULL_DIM*2)),W=raw.W,H=raw.H;
-    const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
-    const buf=window.renderCore(buildParams('normal'),raw.u8,W,H,tex,layerStore);
+    const buf=await renderJob(buildParams('normal'),raw);
     const full=document.createElement('canvas');full.width=W;full.height=H;full.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
     const tw=Math.ceil(W/tileCols),th=Math.ceil(H/tileRows);let delay=0;
     for(let r=0;r<tileRows;r++)for(let cc=0;cc<tileCols;cc++){
@@ -1344,10 +1414,9 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     const zipFiles=[];let idx=0;
     for(const f of files){idx++;await new Promise(res=>{
       const url=URL.createObjectURL(f),img=new Image();
-      img.onload=()=>{const s=Math.min(1,FULL_DIM/Math.max(img.naturalWidth,img.naturalHeight)),W=Math.round(img.naturalWidth*s),H=Math.round(img.naturalHeight*s);
+      img.onload=async ()=>{const s=Math.min(1,FULL_DIM/Math.max(img.naturalWidth,img.naturalHeight)),W=Math.round(img.naturalWidth*s),H=Math.round(img.naturalHeight*s);
         off.width=W;off.height=H;offc.drawImage(img,0,0,W,H);const u8=new Uint8ClampedArray(offc.getImageData(0,0,W,H).data);
-        const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
-        const buf=window.renderCore(buildParams('normal'),u8,W,H,tex,layerStore);
+        const buf=await renderJob(buildParams('normal'),{u8,W,H});
         const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
         if(showMarks)drawMarks(g,W,H);
         const base=f.name.replace(/\.[^.]+$/,'');
@@ -1375,11 +1444,11 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     const done=new Promise(r=>rec.onstop=r);
     const btn=$('recordVid'),lab=btn.innerHTML;btn.disabled=true;
     rec.start();
-    const baseSeed=state.seed,baseMis=state.mis,tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
+    const baseSeed=state.seed,baseMis=state.mis;
     for(let f=0;f<vidFrames;f++){
       const p=buildParams('normal');
       if(vidMode==='seed')p.seed=baseSeed+f*7+1;else p.mis=Math.max(0,baseMis+Math.sin(f/vidFrames*Math.PI*2)*7);
-      const buf=window.renderCore(p,raw.u8,W,H,tex,layerStore);
+      const buf=await renderJob(p,raw);
       rg.putImageData(new ImageData(new Uint8ClampedArray(buf),W,H),0,0);
       if(track.requestFrame)track.requestFrame();
       btn.innerHTML=Math.round((f+1)/vidFrames*100)+'%';
