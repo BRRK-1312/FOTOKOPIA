@@ -312,6 +312,7 @@
     <div class="group collapsed" data-g>
       <h3 data-i18n="g_pro">Pro / Print</h3>
       <div class="body">
+        <div class="ctrl"><label class="toggle on" id="gpuToggle"><span class="box"></span> <span data-i18n="gpu">Preview GPU (WebGL)</span></label></div>
         <span class="cap" data-i18n="curves">CURVAS POR PLANCHA</span>
         <div class="seg" id="lvPlate" style="grid-template-columns:repeat(4,1fr);margin-bottom:8px"></div>
         <div class="ctrl"><label><span data-i18n="lv_lo">Negro (in)</span><span class="val" id="vLvLo">0.00</span></label><input type="range" id="lvLo" min="0" max="0.9" step="0.02" value="0"></div>
@@ -770,9 +771,9 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
 
   // ---------- i18n ----------
   const T={
-    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES",g_pro:"Pro / Imprenta",curves:"CURVAS POR PLANCHA",lv_lo:"Negro (in)",lv_hi:"Blanco (in)",lv_g:"Gamma",layers:"CAPAS POR PLANCHA (MULTICAPA)",histo:"HISTOGRAMA POR PLANCHA",analyze:"ANALIZAR PLANCHAS",ab:"COMPARADOR A/B",view_ab:"VER A | B",gallery:"GALERÍA DE PRESETS",open_gallery:"ABRIR GALERÍA",paper_profile:"Perfil de papel",pp_offset:"Offset",pp_coated:"Couché",pp_uncoated:"Offset+",pp_news:"Prensa",pp_porous:"Poroso",htaa:"Antialias de trama (2×)",gcr:"GCR / UCR (negro)",zip:"Empaquetar en ZIP",lv_reset:"RESET CURVA",store_a:"GUARDAR A",store_b:"GUARDAR B",pl_ink:"Tinta",ly_has:"IMG ✓",ly_upload:"subir imagen",clip_warn:"⚠ saturación:",clip_ok:"sin recorte excesivo",need_ab:"Guarda A y B primero.",need_img:"Carga una imagen primero.",fit_stretch:"ESTIRAR",fit_cover:"CUBRIR",fit_contain:"ENCAJAR"},
-    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU",g_pro:"Pro / Inprenta",curves:"PLAKA BAKOITZAREN KURBAK",lv_lo:"Beltza (sar)",lv_hi:"Zuria (sar)",lv_g:"Gamma",layers:"PLAKA BAKOITZEKO GERUZAK",histo:"PLAKA BAKOITZAREN HISTOGRAMA",analyze:"PLAKAK AZTERTU",ab:"A/B KONPARATZAILEA",view_ab:"IKUSI A | B",gallery:"AURREZARPEN GALERIA",open_gallery:"GALERIA IREKI",paper_profile:"Paper profila",pp_offset:"Offset",pp_coated:"Kutxetua",pp_uncoated:"Offset+",pp_news:"Prentsa",pp_porous:"Porotsua",htaa:"Tramaren antialias (2×)",gcr:"GCR / UCR (beltza)",zip:"ZIP-en bildu",lv_reset:"KURBA BERREZARRI",store_a:"A GORDE",store_b:"B GORDE",pl_ink:"Tinta",ly_has:"IRUDIA ✓",ly_upload:"irudia igo",clip_warn:"⚠ asetasuna:",clip_ok:"gehiegizko mozketarik ez",need_ab:"Gorde A eta B lehenik.",need_img:"Kargatu irudi bat lehenik.",fit_stretch:"LUZATU",fit_cover:"BETE",fit_contain:"DOITU"},
-    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES",g_pro:"Pro / Print",curves:"PER-PLATE CURVES",lv_lo:"Black (in)",lv_hi:"White (in)",lv_g:"Gamma",layers:"PER-PLATE LAYERS (MULTILAYER)",histo:"PER-PLATE HISTOGRAM",analyze:"ANALYZE PLATES",ab:"A/B COMPARE",view_ab:"VIEW A | B",gallery:"PRESET GALLERY",open_gallery:"OPEN GALLERY",paper_profile:"Paper profile",pp_offset:"Offset",pp_coated:"Coated",pp_uncoated:"Offset+",pp_news:"News",pp_porous:"Porous",htaa:"Screen antialias (2×)",gcr:"GCR / UCR (black)",zip:"Pack as ZIP",lv_reset:"RESET CURVE",store_a:"STORE A",store_b:"STORE B",pl_ink:"Ink",ly_has:"IMG ✓",ly_upload:"upload image",clip_warn:"⚠ clipping:",clip_ok:"no excessive clipping",need_ab:"Store A and B first.",need_img:"Load an image first.",fit_stretch:"STRETCH",fit_cover:"COVER",fit_contain:"FIT"}
+    es:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"procesando…",hint:"rueda: zoom · arrastrar: mover · doble clic: reiniciar",drop:"SUELTA UNA IMAGEN",dropsub:"Arrastra un archivo o haz clic. Todo se procesa en tu navegador.",g_tone:"Tono",contrast:"Contraste",threshold:"Umbral",g_edge:"Borde / Sangrado",bleed:"Sangrado",warp:"Ondulación",crust:"Mordida",soft:"Blandura de borde",dirangle:"Dirección sangrado",diramt:"Cantidad direccional",g_halftone:"Semitono",ht_on:"Activar trama",ht_freq:"Frecuencia (px)",dotgain:"Ganancia de punto",g_grain:"Grano (Mono)",speck:"Motas de tóner",drop:"Calvas (dropout)",g_paper:"Papel",fiber:"Textura de fibra",vig:"Viñeteo",g_color:"Color",mode:"Modo",c_ink:"TINTA",c_paper:"PAPEL",mis:"Misregistration",misrot:"Rotación plancha",rich:"Riqueza CMY",invert:"Invertir",g_texture:"Textura",blend:"Mezcla",applyon:"Aplicar en",ap_all:"Todo",ap_ink:"Tinta",ap_paper:"Papel",opacity:"Opacidad",scale:"Escala",g_seed:"Semilla",exp_png:"EXPORTAR PNG",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"SEPARACIONES C M Y K",compare:"COMPARAR",changeimg:"CAMBIAR IMG",footmeta:"Procesado local · arrastra para sustituir",screentype:"Tipo de trama",st_cont:"Sólido",st_am:"Punto",st_line:"Línea",st_cross:"Cruz",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estoc.",dotshape:"Forma de punto",ds_round:"Redondo",ds_ellipse:"Elíptico",ds_square:"Cuadrado",trap:"Trapping (choke/spread)",generations:"Copia de copia",separation:"Separación",sep_spot:"Spot / Dúo",angles:"ÁNGULOS DE TRAMA",addink:"+ TINTA",g_degrade:"Degradación",deg_streak:"Rayas de tambor",deg_leak:"Fuga de luz",deg_corner:"Esquina de fuga",deg_rough:"Borde roto",deg_skew:"Inclinación (skew)",exp_svg:"EXPORTAR SVG VECTORIAL",undo:"↶ DESHACER",redo:"REHACER ↷",marks:"MARCAS REG.",share:"COMPARTIR URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Avanzado",adv_vector:"SALIDA VECTORIAL / PRINT",exp_pdf:"PDF SEPARACIONES",adv_tile:"TILING GRAN FORMATO",tile_cols:"COLUMNAS",tile_rows:"FILAS",exp_tiles:"EXPORTAR TILES",adv_text:"TEXTO COMO IMAGEN",text_size:"Tamaño",text_font:"Tipografía",text_use:"USAR COMO IMAGEN",adv_video:"VÍDEO WEBM",vid_frames:"Fotogramas",vid_mode:"Animar",vid_seed:"Semilla",vid_mis:"Registro",vid_rec:"GRABAR WEBM",adv_batch:"PROCESO POR LOTES",batch:"PROCESAR VARIAS IMÁGENES",g_pro:"Pro / Imprenta",curves:"CURVAS POR PLANCHA",lv_lo:"Negro (in)",lv_hi:"Blanco (in)",lv_g:"Gamma",layers:"CAPAS POR PLANCHA (MULTICAPA)",histo:"HISTOGRAMA POR PLANCHA",analyze:"ANALIZAR PLANCHAS",ab:"COMPARADOR A/B",view_ab:"VER A | B",gallery:"GALERÍA DE PRESETS",open_gallery:"ABRIR GALERÍA",paper_profile:"Perfil de papel",pp_offset:"Offset",pp_coated:"Couché",pp_uncoated:"Offset+",pp_news:"Prensa",pp_porous:"Poroso",htaa:"Antialias de trama (2×)",gcr:"GCR / UCR (negro)",zip:"Empaquetar en ZIP",lv_reset:"RESET CURVA",store_a:"GUARDAR A",store_b:"GUARDAR B",pl_ink:"Tinta",ly_has:"IMG ✓",ly_upload:"subir imagen",clip_warn:"⚠ saturación:",clip_ok:"sin recorte excesivo",need_ab:"Guarda A y B primero.",need_img:"Carga una imagen primero.",fit_stretch:"ESTIRAR",fit_cover:"CUBRIR",fit_contain:"ENCAJAR",gpu:"Preview GPU (WebGL)",gpu_na:"WebGL no disponible en este navegador."},
+    eus:{tagline:"Tinta-isuria · Xerox · Riso · CMYK",rendering:"prozesatzen…",hint:"gurpila: zoom · arrastatu: mugitu · klik bikoitza: berrabiarazi",drop:"JAREGIN IRUDI BAT",dropsub:"Arrastatu fitxategi bat edo egin klik. Dena zure nabigatzailean prozesatzen da.",g_tone:"Tonua",contrast:"Kontrastea",threshold:"Atalasea",g_edge:"Ertza / Isuria",bleed:"Isuria",warp:"Uhindura",crust:"Hozkada",soft:"Ertz-biguntasuna",dirangle:"Isuri-norabidea",diramt:"Norabide-kopurua",g_halftone:"Erditonua",ht_on:"Trama aktibatu",ht_freq:"Maiztasuna (px)",dotgain:"Puntu-irabazia",g_grain:"Pikorra (Mono)",speck:"Toner-orbanak",drop:"Soilguneak",g_paper:"Papera",fiber:"Zuntz-testura",vig:"Bineta",g_color:"Kolorea",mode:"Modua",c_ink:"TINTA",c_paper:"PAPERA",mis:"Erregistro-akatsa",misrot:"Plaka-biraketa",rich:"CMY aberastasuna",invert:"Alderantzikatu",g_texture:"Testura",blend:"Nahasketa",applyon:"Non aplikatu",ap_all:"Dena",ap_ink:"Tinta",ap_paper:"Papera",opacity:"Opakutasuna",scale:"Eskala",g_seed:"Hazia",exp_png:"PNG ESPORTATU",exp_hi:"PNG 2×",exp_alpha:"PNG TINTA",exp_sep:"BEREIZKETAK C M Y K",compare:"KONPARATU",changeimg:"IRUDIA ALDATU",footmeta:"Tokian prozesatua · arrastatu ordezteko",screentype:"Trama mota",st_cont:"Trinkoa",st_am:"Puntua",st_line:"Lerroa",st_cross:"Gurutzea",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Estok.",dotshape:"Puntu-forma",ds_round:"Biribila",ds_ellipse:"Eliptikoa",ds_square:"Karratua",trap:"Trapping (choke/spread)",generations:"Kopiaren kopia",separation:"Bereizketa",sep_spot:"Spot / Duo",angles:"TRAMA-ANGELUAK",addink:"+ TINTA",g_degrade:"Degradazioa",deg_streak:"Danbor-marrak",deg_leak:"Argi-ihesa",deg_corner:"Ihes-izkina",deg_rough:"Ertz hautsia",deg_skew:"Okertzea (skew)",exp_svg:"SVG BEKTORIALA ESPORTATU",undo:"↶ DESEGIN",redo:"BERREGIN ↷",marks:"ERREG. MARKAK",share:"URLA PARTEKATU",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Aurreratua",adv_vector:"IRTEERA BEKTORIALA / PRINT",exp_pdf:"PDF BEREIZKETAK",adv_tile:"TILING FORMATU HANDIA",tile_cols:"ZUTABEAK",tile_rows:"ERRENKADAK",exp_tiles:"TILEAK ESPORTATU",adv_text:"TESTUA IRUDI GISA",text_size:"Tamaina",text_font:"Tipografia",text_use:"IRUDI GISA ERABILI",adv_video:"WEBM BIDEOA",vid_frames:"Fotogramak",vid_mode:"Animatu",vid_seed:"Hazia",vid_mis:"Erregistroa",vid_rec:"WEBM GRABATU",adv_batch:"SORTAKA PROZESATU",batch:"IRUDI ANITZ PROZESATU",g_pro:"Pro / Inprenta",curves:"PLAKA BAKOITZAREN KURBAK",lv_lo:"Beltza (sar)",lv_hi:"Zuria (sar)",lv_g:"Gamma",layers:"PLAKA BAKOITZEKO GERUZAK",histo:"PLAKA BAKOITZAREN HISTOGRAMA",analyze:"PLAKAK AZTERTU",ab:"A/B KONPARATZAILEA",view_ab:"IKUSI A | B",gallery:"AURREZARPEN GALERIA",open_gallery:"GALERIA IREKI",paper_profile:"Paper profila",pp_offset:"Offset",pp_coated:"Kutxetua",pp_uncoated:"Offset+",pp_news:"Prentsa",pp_porous:"Porotsua",htaa:"Tramaren antialias (2×)",gcr:"GCR / UCR (beltza)",zip:"ZIP-en bildu",lv_reset:"KURBA BERREZARRI",store_a:"A GORDE",store_b:"B GORDE",pl_ink:"Tinta",ly_has:"IRUDIA ✓",ly_upload:"irudia igo",clip_warn:"⚠ asetasuna:",clip_ok:"gehiegizko mozketarik ez",need_ab:"Gorde A eta B lehenik.",need_img:"Kargatu irudi bat lehenik.",fit_stretch:"LUZATU",fit_cover:"BETE",fit_contain:"DOITU",gpu:"GPU aurrebista (WebGL)",gpu_na:"WebGL ez dago erabilgarri nabigatzaile honetan."},
+    en:{tagline:"Ink Bleed · Xerox · Riso · CMYK",rendering:"rendering…",hint:"wheel: zoom · drag: pan · double-click: reset",drop:"DROP AN IMAGE",dropsub:"Drag a file or click. Everything is processed in your browser.",g_tone:"Tone",contrast:"Contrast",threshold:"Threshold",g_edge:"Edge / Bleed",bleed:"Bleed",warp:"Undulation",crust:"Bite",soft:"Edge softness",dirangle:"Bleed direction",diramt:"Directional amount",g_halftone:"Halftone",ht_on:"Enable screen",ht_freq:"Frequency (px)",dotgain:"Dot gain",g_grain:"Grain (Mono)",speck:"Toner specks",drop:"Dropout",g_paper:"Paper",fiber:"Fibre texture",vig:"Vignette",g_color:"Color",mode:"Mode",c_ink:"INK",c_paper:"PAPER",mis:"Misregistration",misrot:"Plate rotation",rich:"CMY richness",invert:"Invert",g_texture:"Texture",blend:"Blend",applyon:"Apply on",ap_all:"All",ap_ink:"Ink",ap_paper:"Paper",opacity:"Opacity",scale:"Scale",g_seed:"Seed",exp_png:"EXPORT PNG",exp_hi:"PNG 2×",exp_alpha:"INK PNG",exp_sep:"SEPARATIONS C M Y K",compare:"COMPARE",changeimg:"CHANGE IMG",footmeta:"Processed locally · drag to replace",screentype:"Screen type",st_cont:"Solid",st_am:"Dot",st_line:"Line",st_cross:"Cross",st_fm:"FM",st_bayer:"Bayer",st_stoch:"Stoch.",dotshape:"Dot shape",ds_round:"Round",ds_ellipse:"Elliptical",ds_square:"Square",trap:"Trapping (choke/spread)",generations:"Copy of a copy",separation:"Separation",sep_spot:"Spot / Duo",angles:"SCREEN ANGLES",addink:"+ INK",g_degrade:"Degradation",deg_streak:"Drum streaks",deg_leak:"Light leak",deg_corner:"Leak corner",deg_rough:"Torn edge",deg_skew:"Skew",exp_svg:"EXPORT VECTOR SVG",undo:"↶ UNDO",redo:"REDO ↷",marks:"REG. MARKS",share:"SHARE URL",exp_json:"JSON ↧",imp_json:"JSON ↥",g_advanced:"Advanced",adv_vector:"VECTOR / PRINT OUTPUT",exp_pdf:"PDF SEPARATIONS",adv_tile:"LARGE-FORMAT TILING",tile_cols:"COLUMNS",tile_rows:"ROWS",exp_tiles:"EXPORT TILES",adv_text:"TEXT AS IMAGE",text_size:"Size",text_font:"Font",text_use:"USE AS IMAGE",adv_video:"WEBM VIDEO",vid_frames:"Frames",vid_mode:"Animate",vid_seed:"Seed",vid_mis:"Registration",vid_rec:"RECORD WEBM",adv_batch:"BATCH PROCESS",batch:"PROCESS MULTIPLE IMAGES",g_pro:"Pro / Print",curves:"PER-PLATE CURVES",lv_lo:"Black (in)",lv_hi:"White (in)",lv_g:"Gamma",layers:"PER-PLATE LAYERS (MULTILAYER)",histo:"PER-PLATE HISTOGRAM",analyze:"ANALYZE PLATES",ab:"A/B COMPARE",view_ab:"VIEW A | B",gallery:"PRESET GALLERY",open_gallery:"OPEN GALLERY",paper_profile:"Paper profile",pp_offset:"Offset",pp_coated:"Coated",pp_uncoated:"Offset+",pp_news:"News",pp_porous:"Porous",htaa:"Screen antialias (2×)",gcr:"GCR / UCR (black)",zip:"Pack as ZIP",lv_reset:"RESET CURVE",store_a:"STORE A",store_b:"STORE B",pl_ink:"Ink",ly_has:"IMG ✓",ly_upload:"upload image",clip_warn:"⚠ clipping:",clip_ok:"no excessive clipping",need_ab:"Store A and B first.",need_img:"Load an image first.",fit_stretch:"STRETCH",fit_cover:"COVER",fit_contain:"FIT",gpu:"GPU preview (WebGL)",gpu_na:"WebGL not available in this browser."}
   };
   let lang='es';
   function applyLang(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[lang][k]!=null)el.textContent=T[lang][k];});document.documentElement.lang=lang;}
@@ -819,7 +820,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   (0,eval)(coreText); // also define renderCore on main (fallback / worker runtime errors)
 
   // ---------- per-plate layers (multilayer) ----------
-  const layerStore={}, layerDirty={};
+  const layerStore={}, layerDirty={}; let _layerStamp=0;
   function lumFromCanvas(c){
     const w=c.width,h=c.height,d=c.getContext('2d').getImageData(0,0,w,h).data;
     const lum=new Float32Array(w*h);for(let i=0,p=0;i<lum.length;i++,p+=4)lum[i]=(0.299*d[p]+0.587*d[p+1]+0.114*d[p+2])/255;
@@ -830,7 +831,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     const w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
     const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
     const L=lumFromCanvas(c);
-    layerStore[key]={lum:L.lum,w,h,opts:opts||{},dataURL:dataURL||c.toDataURL('image/jpeg',0.9)};
+    layerStore[key]={lum:L.lum,w,h,opts:opts||{},dataURL:dataURL||c.toDataURL('image/jpeg',0.9),stamp:++_layerStamp};
     layerDirty[key]=true;refreshLayerButtons();scheduleRender();
   }
   function loadLayer(key,file){
@@ -873,7 +874,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     off.width=W;off.height=H;offc.drawImage(srcImg,0,0,W,H);
     const d=offc.getImageData(0,0,W,H).data; return {u8:new Uint8ClampedArray(d),W,H};
   }
-  let rawPrev=null, rawFull=null;
+  let rawPrev=null, rawFull=null, rawGpu=null; let srcStamp=0, gpuOn=true; const GPU_DIM=1100;
   const FULL_DIM=1500, PREV_DIM=720;
 
   // ---------- render scheduling ----------
@@ -924,7 +925,15 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     if(!srcImg)return;
     if(typeof scheduleHist==='function')scheduleHist();
     stage.classList.add('working');
-    postRender(rawPrev,'preview',buildParams('normal'));
+    let gpuDone=false;
+    if(gpuOn&&rawGpu&&state.screenType!=='fm'&&GPUP.ok()){
+      try{
+        const tex=(state.texId!=null&&texSlots[state.texId]&&texSlots[state.texId].tex)?texSlots[state.texId].tex:null;
+        const g=GPUP.render(buildParams('normal'),rawGpu,srcStamp,layerStore,tex,state.texId);
+        if(g){cv.width=rawGpu.W;cv.height=rawGpu.H;ctx.drawImage(GPUP.canvas(),0,0);cv.classList.remove('hidden');gpuDone=true;}
+      }catch(e){gpuOn=false;const t=$('gpuToggle');if(t)t.classList.remove('on');}
+    }
+    if(!gpuDone)postRender(rawPrev,'preview',buildParams('normal'));
     clearTimeout(fullTimer);
     fullTimer=setTimeout(()=>postRender(rawFull,'full',buildParams('normal')),200);
   }
@@ -1037,7 +1046,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
   ['dragenter','dragover'].forEach(ev=>stage.addEventListener(ev,e=>{e.preventDefault();dropEl.classList.add('hot');}));
   ['dragleave','drop'].forEach(ev=>stage.addEventListener(ev,e=>{e.preventDefault();if(ev==='drop'||e.target===dropEl)dropEl.classList.remove('hot');}));
   stage.addEventListener('drop',e=>{const f=[...e.dataTransfer.files].find(x=>x.type.startsWith('image/'));if(f)loadFile(f);});
-  function loadFile(file){const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{srcImg=img;beforeImg.src=url;rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);dropEl.classList.add('hidden');hint.classList.remove('hidden');cv.classList.remove('hidden');view={z:1,x:0,y:0};applyView();scheduleRender();};img.src=url;}
+  function loadFile(file){const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{srcImg=img;beforeImg.src=url;rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);rawGpu=makeRaw(GPU_DIM);srcStamp++;dropEl.classList.add('hidden');hint.classList.remove('hidden');cv.classList.remove('hidden');view={z:1,x:0,y:0};applyView();scheduleRender();};img.src=url;}
 
   // ---------- zoom / pan ----------
   let view={z:1,x:0,y:0};
@@ -1195,9 +1204,333 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     reg(W/2,m*0.7);reg(W/2,H-m*0.7);return s+'</g>\n';}
   $('exportSvg').addEventListener('click',async ()=>{if(!srcImg)return;const svg=await buildSVG();if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotokopia_'+Date.now()+'.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);});
 
+  // ===== GPU preview (WebGL, aproximación en vivo; el render CPU exacto llega al soltar) =====
+  const GPUP=(function(){
+    const MAXP=6;
+    const VSH='attribute vec2 aP;varying vec2 vUV;void main(){vUV=aP*0.5+0.5;gl_Position=vec4(aP,0.,1.);}';
+    const FSH=[
+'precision highp float;',
+'varying vec2 vUV;',
+'uniform vec2 uSize;',
+'uniform sampler2D uSrc,uFields,uBayer,uPaper,uL0,uL1,uL2,uL3;',
+'uniform int uNP;',
+'uniform vec3 uPCol['+MAXP+'];',
+'uniform vec4 uPA['+MAXP+'];',   // offX,offY,rot,screenAngRad
+'uniform vec4 uPLv['+MAXP+'];',  // lo,hi,gamma,layerSlot(-1 none)
+'uniform vec4 uPSep['+MAXP+'];', // spot: center,width,gamma | cmyk: chan in .w
+'uniform vec4 uLFit[4];',        // px,py,ox,oy
+'uniform vec4 uLOpt[4];',        // inv,mask,bounded,0
+'uniform vec2 uLSize[4];',
+'uniform int uMode,uScreen,uShape,uTexMode,uTexApply;',
+'uniform float uContrast,uInvert,uTh,uBand,uWarpAmt,uCrustAmt,uFreq,uDG,uProfAmt,uProfSkew;',
+'uniform float uGcr,uRich,uVig,uFiberAmp,uSpeckP,uDropP,uSkewSlope,uBlurR,uBleed;',
+'uniform float uStreakAmt,uLeakAmt,uSeedF,uRoughMd,uTexOp;',
+'uniform vec2 uLeakPos,uTexSize;uniform vec4 uTexFit;',
+'uniform vec3 uPaperCol;',
+'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+'vec4 fieldsAt(vec2 xy){return texture2D(uFields,(xy+0.5)/uSize);}',
+'vec3 srcAt(vec2 xy){vec2 c=clamp(xy,vec2(0.),uSize-1.);return texture2D(uSrc,(c+0.5)/uSize).rgb;}',
+'float layerAt(int s,vec2 xy){',
+'  vec4 F=uLFit[0];vec4 O=uLOpt[0];vec2 LS=uLSize[0];vec4 col;',
+'  if(s==1){F=uLFit[1];O=uLOpt[1];LS=uLSize[1];}',
+'  if(s==2){F=uLFit[2];O=uLOpt[2];LS=uLSize[2];}',
+'  if(s==3){F=uLFit[3];O=uLOpt[3];LS=uLSize[3];}',
+'  vec2 f=(xy-F.zw)*F.xy;',
+'  if(O.z>0.5&&(f.x<0.||f.y<0.||f.x>LS.x-1.||f.y>LS.y-1.))return 0.;',
+'  f=clamp(f,vec2(0.),LS-1.);',
+'  float l;vec2 uv=(f+0.5)/LS;',
+'  if(s==0)l=texture2D(uL0,uv).r;else if(s==1)l=texture2D(uL1,uv).r;else if(s==2)l=texture2D(uL2,uv).r;else l=texture2D(uL3,uv).r;',
+'  if(uInvert>0.5)l=1.-l;if(O.x>0.5)l=1.-l;',
+'  l=clamp((l-0.5)*uContrast+0.5,0.,1.);return 1.-l;',
+'}',
+'float coverage(int k,vec2 xy){',
+'  float cov;',
+'  vec4 sp=uPSep[0];vec4 lv=uPLv[0];',
+'  for(int i=1;i<'+MAXP+';i++){if(i==k){sp=uPSep[i];lv=uPLv[i];}}',
+'  if(uMode==0){',
+'    vec3 s=srcAt(xy);float l=dot(s,vec3(0.299,0.587,0.114));',
+'    float pv=128.0/255.0;l=(l-pv)*uContrast+pv;if(uInvert>0.5)l=1.-l;l=clamp(l,0.,1.);cov=1.-l;',
+'  }else if(uMode==1){',
+'    vec3 s=srcAt(xy);float l=dot(s,vec3(0.299,0.587,0.114));',
+'    l=clamp((l-0.5)*uContrast+0.5,0.,1.);if(uInvert>0.5)l=1.-l;float lum=1.-l;',
+'    float d=abs(lum-sp.x)/max(0.05,sp.y);float v=clamp(1.-d,0.,1.);cov=pow(v,1./max(0.001,sp.z));',
+'  }else{',
+'    vec3 s=srcAt(xy);if(uInvert>0.5)s=1.-s;',
+'    s=clamp((s-0.5)*uContrast+0.5,0.,1.);',
+'    float kk=1.-max(s.r,max(s.g,s.b));float C=0.,M=0.,Y=0.;',
+'    if(kk<1.){float ik=1.-kk;C=(1.-s.r-kk)/ik;M=(1.-s.g-kk)/ik;Y=(1.-s.b-kk)/ik;}',
+'    if(uGcr>0.){float gr=min(C,min(M,Y));float mv=uGcr*gr;C-=mv;M-=mv;Y-=mv;kk=min(1.,kk+mv);}',
+'    if(uRich>0.){C=min(1.,C+kk*uRich);M=min(1.,M+kk*uRich);Y=min(1.,Y+kk*uRich);}',
+'    float ch=sp.w;cov=(ch<0.5)?C:(ch<1.5)?M:(ch<2.5)?Y:kk;',
+'  }',
+'  float slot=lv.w;',
+'  if(slot>-0.5){',
+'    int si=int(slot+0.5);float lc=layerAt(si,xy);',
+'    vec4 O=uLOpt[0];if(si==1)O=uLOpt[1];if(si==2)O=uLOpt[2];if(si==3)O=uLOpt[3];',
+'    cov=(O.y>0.5)?lc*cov:lc;',
+'  }',
+'  if(lv.x!=0.||lv.y!=1.||lv.z!=1.){float v=(cov-lv.x)/max(0.001,lv.y-lv.x);v=clamp(v,0.,1.);cov=(lv.z==1.)?v:pow(v,lv.z);}',
+'  return cov;',
+'}',
+// soft grayscale field: gray=255*(1-cov) with approximated bleed(dilate)+blur
+'float softAt(int k,vec2 xy){',
+'  float g=255.*(1.-coverage(k,xy));',
+'  if(uBleed>0.){',
+'    float m=g;',
+'    m=min(m,255.*(1.-coverage(k,xy+vec2(uBleed,0.))));',
+'    m=min(m,255.*(1.-coverage(k,xy-vec2(uBleed,0.))));',
+'    m=min(m,255.*(1.-coverage(k,xy+vec2(0.,uBleed))));',
+'    m=min(m,255.*(1.-coverage(k,xy-vec2(0.,uBleed))));',
+'    g=m;',
+'  }',
+'  float r=uBlurR*0.7;',
+'  float s=g*0.34;',
+'  s+=255.*(1.-coverage(k,xy+vec2(r,r)))*0.165;',
+'  s+=255.*(1.-coverage(k,xy+vec2(-r,r)))*0.165;',
+'  s+=255.*(1.-coverage(k,xy+vec2(r,-r)))*0.165;',
+'  s+=255.*(1.-coverage(k,xy+vec2(-r,-r)))*0.165;',
+'  return s;',
+'}',
+'float dotGainF(float c){',
+'  if(uDG<=0.)return clamp(c,0.,1.);c=clamp(c,0.,1.);',
+'  float sh=sin(3.14159265*c);float s2=sh*(1.+uProfSkew*(c-0.5)*2.);',
+'  return clamp(c+uDG*uProfAmt*0.5*s2,0.,1.);',
+'}',
+'float contAt(int k,vec2 xy){',
+'  vec4 pa=uPA[0];for(int i=1;i<'+MAXP+';i++){if(i==k)pa=uPA[i];}',
+'  vec2 c2=uSize*0.5;vec2 s=xy;',
+'  if(pa.z!=0.){vec2 r=xy-c2;float cs=cos(pa.z),sn=sin(pa.z);s=c2+vec2(r.x*cs-r.y*sn,r.x*sn+r.y*cs);}',
+'  vec4 F=fieldsAt(xy);',
+'  float wx=F.r*uWarpAmt+uSkewSlope*(xy.y-c2.y);float wy=F.g*uWarpAmt;',
+'  float val=softAt(k,s+pa.xy+vec2(wx,wy))+F.b*uCrustAmt;',
+'  float c=clamp((uTh-val)/uBand+0.5,0.,1.);c=dotGainF(c);',
+'  if(uRoughMd>0.){float d=min(min(xy.x,xy.y),min(uSize.x-1.-xy.x,uSize.y-1.-xy.y));',
+'    float thr=uRoughMd*(0.4+F.b);if(d<=thr)c=0.;}',
+'  return c;',
+'}',
+'float screenAt(float ang,vec2 xy,float cc){',
+'  if(cc<=0.)return 0.;',
+'  if(uScreen==0)return cc;',
+'  if(uScreen==4){vec2 b=mod(floor(xy),8.);float bv=texture2D(uBayer,(b+0.5)/8.).r;return cc>bv?1.:0.;}',
+'  if(uScreen==5){return cc>hash(floor(xy)*vec2(1.31,1.37))?1.:0.;}',
+'  float ca=cos(ang),sa=sin(ang),aa=0.06;',
+'  float u=xy.x*ca-xy.y*sa,v=xy.x*sa+xy.y*ca;',
+'  if(uScreen==2){float cv=v/uFreq;float dv=cv-floor(cv+0.5);float R=cc*0.5;return clamp((R-abs(dv))/aa+0.5,0.,1.);}',
+'  if(uScreen==3){float cu=u/uFreq,cv=v/uFreq;float du=cu-floor(cu+0.5),dv=cv-floor(cv+0.5);float R=cc*0.5;',
+'    return max(clamp((R-abs(du))/aa+0.5,0.,1.),clamp((R-abs(dv))/aa+0.5,0.,1.));}',
+'  float cu=u/uFreq,cv=v/uFreq;float du=cu-floor(cu+0.5),dv=cv-floor(cv+0.5);float dist,R;',
+'  if(uShape==2){dist=max(abs(du),abs(dv));R=sqrt(clamp(cc,0.,1.))*0.5;}',
+'  else if(uShape==1){dist=sqrt(du*du*1.7+dv*dv*0.6);R=sqrt(clamp(cc,0.,1.))*0.72;}',
+'  else{dist=sqrt(du*du+dv*dv);R=sqrt(clamp(cc,0.,1.))*0.71;}',
+'  return clamp((R-dist)/aa+0.5,0.,1.);',
+'}',
+'float blendCh(float b,float t,float op){',
+'  float r=b;',
+'  if(uTexMode==1)r=b*t;else if(uTexMode==2)r=1.-(1.-b)*(1.-t);',
+'  else if(uTexMode==3)r=(b<0.5)?2.*b*t:1.-2.*(1.-b)*(1.-t);',
+'  else if(uTexMode==4)r=(1.-2.*t)*b*b+2.*t*b;',
+'  return b*(1.-op)+r*op;',
+'}',
+'void main(){',
+'  vec2 xy=vec2(vUV.x,1.-vUV.y)*uSize-0.5;',
+'  vec4 F=fieldsAt(xy);',
+'  float papM=F.a*2.*uFiberAmp/255.;',
+'  vec3 col=uPaperCol+vec3(papM);',
+'  float inkMax=0.;',
+'  for(int k=0;k<'+MAXP+';k++){',
+'    if(k>=uNP)break;',
+'    vec4 pa=uPA[0];vec3 pc=uPCol[0];',
+'    for(int i=1;i<'+MAXP+';i++){if(i==k){pa=uPA[i];pc=uPCol[i];}}',
+'    float cc=contAt(k,xy);',
+'    float t=screenAt(pa.w,xy,cc);',
+'    if(uMode==0){',
+'      float nz=hash(floor(xy));if(t<1.&&nz<uSpeckP)t=1.;',
+'      else if(t>0.&&hash(floor(xy)+vec2(7.,13.))<uDropP)t=0.;',
+'    }',
+'    inkMax=max(inkMax,t);',
+'    col*=(vec3(1.)-t*(vec3(1.)-pc));',
+'  }',
+'  vec2 c2=uSize*0.5;float maxR=length(c2);',
+'  if(uVig>0.){float d=length(xy-c2)/maxR;col*=(1.-d*d*uVig);}',
+'  if(uStreakAmt>0.){float b=0.5+0.5*sin(xy.y*0.08+uSeedF*6.28)+(hash(vec2(floor(xy.y),3.))-0.5)*0.6;',
+'    col*=(1.-max(0.,b-0.6)*uStreakAmt);}',
+'  if(uLeakAmt>0.){vec2 dd=(xy-uLeakPos)/uSize;float d=length(dd);float f=max(0.,1.-d*1.3);',
+'    float li=uLeakAmt*f*f*120./255.;col+=vec3(li,li*0.92,li*0.72);}',
+'  if(uTexOp>0.){',
+'    vec2 s=clamp((xy-uTexFit.zw)*uTexFit.xy,vec2(0.),uTexSize-1.);',
+'    float tv=texture2D(uPaper,(s+0.5)/uTexSize).r;',
+'    float m=(uTexApply==1)?inkMax:(uTexApply==2)?(1.-inkMax):1.;float eo=uTexOp*m;',
+'    col=vec3(blendCh(col.r,tv,eo),blendCh(col.g,tv,eo),blendCh(col.b,tv,eo));',
+'  }',
+'  gl_FragColor=vec4(clamp(col,0.,1.),1.);',
+'}'
+].join('\n');
+    let gl=null,pr=null,U={},cvs=null,ready=false,failed=false;
+    let keySrc='',keyFld='',keyLay=['','','',''],keyTex='';
+    let tSrc,tFld,tBay,tPap,tLay=[null,null,null,null];
+    function mkTex(unit,filter){const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,filter);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,filter);return t;}
+    function init(extGl){
+      if(ready||failed)return ready;
+      try{
+        if(extGl)gl=extGl;
+        else{cvs=document.createElement('canvas');gl=cvs.getContext('webgl',{preserveDrawingBuffer:true,antialias:false,depth:false,stencil:false})||cvs.getContext('experimental-webgl',{preserveDrawingBuffer:true});}
+        if(!gl){failed=true;return false;}
+        function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+          if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+        pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VSH));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSH));gl.linkProgram(pr);
+        if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
+        gl.useProgram(pr);
+        const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+        const ap=gl.getAttribLocation(pr,'aP');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+        ['uSize','uSrc','uFields','uBayer','uPaper','uL0','uL1','uL2','uL3','uNP','uPCol','uPA','uPLv','uPSep','uLFit','uLOpt','uLSize',
+         'uMode','uScreen','uShape','uTexMode','uTexApply','uContrast','uInvert','uTh','uBand','uWarpAmt','uCrustAmt','uFreq','uDG',
+         'uProfAmt','uProfSkew','uGcr','uRich','uVig','uFiberAmp','uSpeckP','uDropP','uSkewSlope','uBlurR','uBleed',
+         'uStreakAmt','uLeakAmt','uSeedF','uRoughMd','uTexOp','uLeakPos','uTexSize','uTexFit','uPaperCol'
+        ].forEach(nm=>{U[nm]=gl.getUniformLocation(pr,nm)||gl.getUniformLocation(pr,nm+'[0]');});
+        tSrc=mkTex(0,gl.LINEAR);tFld=mkTex(1,gl.LINEAR);tBay=mkTex(2,gl.NEAREST);tPap=mkTex(3,gl.LINEAR);
+        for(let i=0;i<4;i++)tLay[i]=mkTex(4+i,gl.LINEAR);
+        const BAY=new Uint8Array(64);const bm=[0,32,8,40,2,34,10,42,48,16,56,24,50,18,58,26,12,44,4,36,14,46,6,38,60,28,52,20,62,30,54,22,3,35,11,43,1,33,9,41,51,19,59,27,49,17,57,25,15,47,7,39,13,45,5,37,63,31,55,23,61,29,53,21];
+        for(let i=0;i<64;i++)BAY[i]=Math.round((bm[i]+0.5)/64*255);
+        gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,tBay);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,8,8,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,BAY);
+        gl.uniform1i(U.uSrc,0);gl.uniform1i(U.uFields,1);gl.uniform1i(U.uBayer,2);gl.uniform1i(U.uPaper,3);
+        gl.uniform1i(U.uL0,4);gl.uniform1i(U.uL1,5);gl.uniform1i(U.uL2,6);gl.uniform1i(U.uL3,7);
+        gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);
+        ready=true;return true;
+      }catch(e){failed=true;return false;}
+    }
+    function upSrc(raw,stamp){
+      const k=stamp+'_'+raw.W+'x'+raw.H;if(k===keySrc)return;keySrc=k;
+      gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tSrc);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT,4);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,raw.W,raw.H,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array(raw.u8.buffer,raw.u8.byteOffset,raw.u8.length));
+    }
+    function upFields(seed,W,H){
+      const k=seed+'_'+W+'x'+H;if(k===keyFld)return;keyFld=k;
+      const F=getFields(seed,W,H);const n=W*H,px=new Uint8Array(n*4);
+      for(let i=0;i<n;i++){const q=i*4;
+        px[q]=Math.max(0,Math.min(255,F.wxA[i]*255));px[q+1]=Math.max(0,Math.min(255,F.wyA[i]*255));
+        px[q+2]=Math.max(0,Math.min(255,F.crA[i]*255));px[q+3]=Math.max(0,Math.min(255,F.fbA[i]*255));}
+      gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,tFld);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,W,H,0,gl.RGBA,gl.UNSIGNED_BYTE,px);
+    }
+    function upLayer(slot,L,key){
+      if(keyLay[slot]===key)return;keyLay[slot]=key;
+      const n=L.w*L.h,px=new Uint8Array(n);
+      for(let i=0;i<n;i++)px[i]=Math.max(0,Math.min(255,L.lum[i]*255));
+      gl.activeTexture(gl.TEXTURE4+slot);gl.bindTexture(gl.TEXTURE_2D,tLay[slot]);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,L.w,L.h,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,px);
+    }
+    function upPaperTex(tex,key){
+      if(keyTex===key)return;keyTex=key;
+      const n=tex.w*tex.h,px=new Uint8Array(n);
+      for(let i=0;i<n;i++)px[i]=Math.max(0,Math.min(255,tex.gray[i]*255));
+      gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,tPap);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,tex.w,tex.h,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,px);
+    }
+    function hx(c){return [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];}
+    function render(p,raw,stamp,layers,tex,texId){
+      if(!init())return null;
+      const W=raw.W,H=raw.H;
+      if(cvs&&(cvs.width!==W||cvs.height!==H)){cvs.width=W;cvs.height=H;}
+      gl.viewport(0,0,W,H);
+      upSrc(raw,stamp);upFields(p.seed,W,H);
+      // ---- plates (mirror of CPU plate building order) ----
+      const cols=[],pas=[],lvs=[],seps=[];let NP=0;
+      const lFit=new Float32Array(16),lOpt=new Float32Array(16),lSize=new Float32Array(8);
+      let slotUsed=0;
+      function addPlate(col,off,rot,angDeg,key,sepv){
+        if(NP>=MAXP)return;
+        cols.push(col[0]/255,col[1]/255,col[2]/255);
+        let slot=-1;
+        const L=layers&&layers[key];
+        if(L&&slotUsed<4){
+          slot=slotUsed++;
+          upLayer(slot,L,key+'_'+(L.stamp||0)+'_'+JSON.stringify(L.opts||{}));
+          const o=L.opts||{};let px,py,ox,oy;
+          if(o.fit==='cover'||o.fit==='contain'){const s=(o.fit==='cover'?Math.min:Math.max)(L.w/W,L.h/H);px=s;py=s;ox=(W-L.w/s)/2;oy=(H-L.h/s)/2;}
+          else{px=L.w/W;py=L.h/H;ox=0;oy=0;}
+          lFit[slot*4]=px;lFit[slot*4+1]=py;lFit[slot*4+2]=ox;lFit[slot*4+3]=oy;
+          lOpt[slot*4]=o.inv?1:0;lOpt[slot*4+1]=o.mode==='mask'?1:0;lOpt[slot*4+2]=o.fit==='contain'?1:0;
+          lSize[slot*2]=L.w;lSize[slot*2+1]=L.h;
+        }
+        const lv=(p.levels&&p.levels[key])||{};
+        lvs.push(lv.lo||0,(lv.hi==null?1:lv.hi),(lv.g||1),slot);
+        pas.push(off[0],off[1],rot,angDeg*Math.PI/180);
+        seps.push(sepv[0],sepv[1],sepv[2],sepv[3]);
+        NP++;
+      }
+      let mode;
+      if(p.colorMode!=='cmyk'){mode=0;addPlate(p.ink,[0,0],0,p.htAngK,'K',[0,0,0,0]);}
+      else if(p.separation==='spot'){mode=1;(p.spotInks||[]).forEach((ink,k)=>addPlate(ink.col,[0,0],0,(ink.ang!=null?ink.ang:[15,75,0,45][k%4]),'s'+k,[ink.center,Math.max(0.05,ink.width),ink.gamma||1,0]));}
+      else{mode=2;
+        const mis=p.mis,offs=[[-mis,-mis*0.45],[mis*0.85,-mis*0.55],[mis*0.25,mis*0.95],[0,0]];
+        const mr=(p.misRot||0)*Math.PI/180,rots=[-mr,0,mr,0];
+        const pcols=[p.colC,p.colM,p.colY,p.colK],angs=[p.htAngC,p.htAngM,p.htAngY,p.htAngK],keys=['C','M','Y','K'];
+        for(let pl=0;pl<4;pl++)if(p.plateOn[pl])addPlate(pcols[pl],offs[pl],rots[pl],angs[pl],keys[pl],[0,0,0,pl]);
+      }
+      while(cols.length<MAXP*3)cols.push(0);
+      while(pas.length<MAXP*4)pas.push(0);
+      while(lvs.length<MAXP*4)lvs.push(0);
+      while(seps.length<MAXP*4)seps.push(0);
+      gl.uniform2f(U.uSize,W,H);
+      gl.uniform1i(U.uNP,NP);gl.uniform1i(U.uMode,mode);
+      gl.uniform3fv(U.uPCol,new Float32Array(cols));gl.uniform4fv(U.uPA,new Float32Array(pas));
+      gl.uniform4fv(U.uPLv,new Float32Array(lvs));gl.uniform4fv(U.uPSep,new Float32Array(seps));
+      gl.uniform4fv(U.uLFit,lFit);gl.uniform4fv(U.uLOpt,lOpt);gl.uniform2fv(U.uLSize,lSize);
+      const scr={cont:0,am:1,line:2,cross:3,bayer:4,stoch:5}[p.screenType]||0;
+      gl.uniform1i(U.uScreen,scr);
+      gl.uniform1i(U.uShape,{round:0,ellipse:1,square:2}[p.dotShape]||0);
+      gl.uniform1f(U.uContrast,p.contrast);gl.uniform1f(U.uInvert,p.invert?1:0);
+      gl.uniform1f(U.uTh,p.threshold);gl.uniform1f(U.uBand,p.soft);
+      gl.uniform1f(U.uWarpAmt,p.warp/120*7);gl.uniform1f(U.uCrustAmt,p.crust/120*80);
+      gl.uniform1f(U.uFreq,p.htFreq);gl.uniform1f(U.uDG,p.dotgain);
+      const prof=p.paperProfile||'offset';
+      const profAmt={offset:1,coated:0.55,uncoated:1.2,news:1.55,porous:1.95}[prof]||1;
+      const profSkew={offset:0,coated:0,uncoated:0,news:0.12,porous:0.2}[prof]||0;
+      gl.uniform1f(U.uProfAmt,profAmt);gl.uniform1f(U.uProfSkew,profSkew);
+      gl.uniform1f(U.uGcr,p.gcr||0);gl.uniform1f(U.uRich,p.rich||0);
+      gl.uniform1f(U.uVig,p.vig/100);gl.uniform1f(U.uFiberAmp,p.fiber/60*36);
+      gl.uniform1f(U.uSpeckP,p.speck/100*0.06);gl.uniform1f(U.uDropP,p.drop/100*0.10);
+      gl.uniform1f(U.uSkewSlope,Math.tan((p.skew||0)*Math.PI/180));
+      gl.uniform1f(U.uBlurR,Math.max(2,p.bleed+1));gl.uniform1f(U.uBleed,p.bleed);
+      gl.uniform1f(U.uStreakAmt,p.degStreak||0);gl.uniform1f(U.uLeakAmt,p.degLeak||0);
+      const lkC=p.degLeakCorner||0;
+      gl.uniform2f(U.uLeakPos,(lkC===1||lkC===3)?W:0,(lkC>=2)?H:0);
+      gl.uniform1f(U.uSeedF,(((p.seed>>>0)||1)%1000)/1000);
+      gl.uniform1f(U.uRoughMd,(p.degRough||0)>0?Math.min(W,H)*0.13*(p.degRough||0):0);
+      const ik=p.ink,pp=p.paper;
+      gl.uniform3f(U.uPaperCol,pp[0]/255,pp[1]/255,pp[2]/255);
+      // paper texture
+      const texOp=(tex&&p.texOp>0)?p.texOp/100:0;
+      gl.uniform1f(U.uTexOp,texOp);
+      if(texOp>0){
+        upPaperTex(tex,'t'+texId);
+        const ta=tex.w/tex.h,ca2=W/H;let dW,dH;
+        if(ta>ca2){dH=H;dW=H*ta;}else{dW=W;dH=W/ta;}
+        dW*=p.texScale;dH*=p.texScale;
+        gl.uniform4f(U.uTexFit,tex.w/dW,tex.h/dH,(W-dW)/2,(H-dH)/2);
+        gl.uniform2f(U.uTexSize,tex.w,tex.h);
+        gl.uniform1i(U.uTexMode,{multiply:1,screen:2,overlay:3,softlight:4}[p.texMode]||1);
+        gl.uniform1i(U.uTexApply,{all:0,ink:1,paper:2}[p.texApply]||0);
+      }else{gl.uniform1i(U.uTexMode,0);gl.uniform1i(U.uTexApply,0);gl.uniform2f(U.uTexSize,1,1);gl.uniform4f(U.uTexFit,1,1,0,0);}
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      return cvs||gl;
+    }
+    return {init,render,ok:()=>{init();return ready;},canvas:()=>cvs};
+  })();
+
   // ===== Pro module (paper profile, AA, curves, multilayer, histogram, A/B, gallery) =====
   $('paperProfile').addEventListener('click',e=>{const pp=e.target.dataset.pp;if(!pp)return;state.paperProfile=pp;syncSeg('paperProfile','pp',pp);scheduleRender();});
   toggle('htAAToggle','htAA');
+  $('gpuToggle').addEventListener('click',()=>{
+    if(!gpuOn&&!GPUP.ok()){alert(T[lang].gpu_na||'WebGL no disponible en este navegador.');return;}
+    gpuOn=!gpuOn;$('gpuToggle').classList.toggle('on',gpuOn);scheduleRender();
+  });
   function currentPlates(){
     if(state.colorMode!=='cmyk')return [{key:'K',label:T[lang].pl_ink||'Tinta',col:state.ink}];
     if(state.separation==='spot')return state.spotInks.map((ink,k)=>({key:'s'+k,label:'Spot '+(k+1),col:ink.col}));
@@ -1401,7 +1734,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
     const c=document.createElement('canvas');c.width=Math.ceil(maxW+pad*2);c.height=Math.ceil(txt.length*textSize*1.12+pad*2);
     const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.fillStyle='#000';g.textBaseline='top';g.font='700 '+textSize+'px "'+textFont+'", sans-serif';
     txt.forEach((l,i)=>g.fillText(l,pad,pad+i*textSize*1.12));
-    const img=new Image();img.onload=()=>{srcImg=img;beforeImg.src=img.src;rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);dropEl.classList.add('hidden');hint.classList.remove('hidden');cv.classList.remove('hidden');view={z:1,x:0,y:0};applyView();scheduleRender();};img.src=c.toDataURL();
+    const img=new Image();img.onload=()=>{srcImg=img;beforeImg.src=img.src;rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);rawGpu=makeRaw(GPU_DIM);srcStamp++;dropEl.classList.add('hidden');hint.classList.remove('hidden');cv.classList.remove('hidden');view={z:1,x:0,y:0};applyView();scheduleRender();};img.src=c.toDataURL();
   });
 
   // ---- batch ----
@@ -1428,7 +1761,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&self instanceof WorkerGlobalScope){
       };img.onerror=()=>res();img.src=url;
     });}
     if(zipBatch&&zipFiles.length){const zip=window.__buildZip(zipFiles);const zn=tmpl.replace(/\{name\}/g,'lote').replace(/\{n\}/g,'')+'.zip';downloadBytes(new Blob([zip],{type:'application/zip'}),zn,'application/zip');}
-    if(srcImg){rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);scheduleRender();}
+    if(srcImg){rawPrev=makeRaw(PREV_DIM);rawFull=makeRaw(FULL_DIM);rawGpu=makeRaw(GPU_DIM);srcStamp++;scheduleRender();}
   });
 
   // ---- WebM video (animate seed or misregistration) ----
